@@ -1,11 +1,13 @@
 define([
     'jquery',
     'underscore',
+    'bowser',
     'text!templates/mainTemplate.html',
     'text!templates/navTemplate.html'
 ], function(
     $,
     _,
+    bowser,
     mainTmpl,
     navTmpl
 ) {
@@ -15,6 +17,7 @@ define([
         stickyTop,
         $window = $(window),
         anchorsFired = new Array(),
+        mobile = false,
         images = {
             "bob": {
                     "low": "",
@@ -43,7 +46,8 @@ define([
         dom = {};
 
     function init(el, context, config, mediator) {
-        app()
+        whatBrowser();
+        app();
     }
 
     function app() {
@@ -52,12 +56,14 @@ define([
             navTemplate = _.template(navTmpl),
             navHTML = navTemplate({});
 
+        $("html").css("overflow-y", "scroll");
+
         $('body').addClass("intro-visible");
 
         $(".element-interactive").append(mainHTML)
         $(".element-interactive .story-wrapper").before(navHTML);
-        initEvents();
         saveSelectors();
+        initEvents();
     }
 
     function saveSelectors() {
@@ -93,19 +99,28 @@ define([
         console.log(dom);
     }
 
+    function whatBrowser() {
+        if(bowser.mobile) {
+            mobile = true;
+        }
+    }
+
     function initEvents() {
         rightTop = $("#chapter-1").children(".right-container").offset().top - $("#chapter-1").offset().top;
         stickyTop = parseInt($("#css").css("top"), 10);
 
-        $(window).scroll(_.throttle(function() {
-            stickDivs();
-            videoControl();
-            showNav();
-            anchorsAction();
-
-        }, 25));
-
         preLoad();
+
+        if(!mobile) {
+            $(window).scroll(_.throttle(function() {
+                stickDivs();
+                videoControl();
+                showNav();
+                anchorsAction();
+            }, 25));
+        } else {
+            anchorReplace();
+        }
         
         $(".intro video").get(0).addEventListener('ended', function(evt) { closeIntro(); }, false); 
 
@@ -123,6 +138,16 @@ define([
         });
 
         // initTicker();
+    }
+
+    function anchorReplace() {
+        _.each(dom.anchors, function(val, key) {
+            console.log(key);
+            var $el = val;
+
+            $el.after("<div class='mobile-alt' style='background-image: url(\"" + getImage($el.data('mobile-alt')) + "\");'></img>");
+            $el.remove();
+        });
     }
 
     function stickDivs() {
@@ -147,7 +172,7 @@ define([
         _.each(dom.videos.breaks, function(val, key) {
             var $el = val;
 
-            if($el.offset().top - $window.height() + 200 <= $window.scrollTop() && $window.scrollTop() + 200 < $el.parent().offset().top + $el.parent().height()) {
+            if($el.offset().top - $window.height() + 250 <= $window.scrollTop() && $window.scrollTop() + 250 < $el.parent().offset().top + $el.parent().height()) {
                 $el.parent().css("opacity", "1");
                 $el.get(0).volume = 1;
                 setTimeout(function() {
@@ -181,7 +206,9 @@ define([
 
     function closeIntro() {
         $("body").removeClass("intro-visible");
-        dom.videos.breaks['head-1'].get(0).play();
+        if(!mobile) {
+            dom.videos.breaks['head-1'].get(0).play();
+        }
 
         setTimeout(function() {
                 $(".intro").remove();
