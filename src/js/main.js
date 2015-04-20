@@ -25,7 +25,12 @@ define([
                     "low": "",
                     "medium": "",
                     "high": "http://www.mapsofworld.com/australia/australia-map.gif",
-                },  
+                }, 
+            "testLarge": {
+                    "low": "",
+                    "medium": "",
+                    "high": "http://breakingenergy.com/wp-content/uploads/sites/2/2013/06/coal-australia.jpg"
+                }
             },
         videos = {
             "video": {
@@ -99,6 +104,8 @@ define([
             anchorsAction();
 
         }, 25));
+
+        preLoad();
         
         $(".intro video").get(0).addEventListener('ended', function(evt) { closeIntro(); }, false); 
 
@@ -215,19 +222,37 @@ define([
         });
     }
 
+    function preLoad() {
+        var imagesLoaded = 0;
+        _.each(images, function(val, key) {
+            var key = new Image(1,1);
+            key.onload = function() {
+                imagesLoaded++;
+                if(imagesLoaded === _.keys(images).length) {
+                    onLoaded();
+                }
+            }
+            key.src = val.high;
+        });
+    }
+
+    function onLoaded() {
+        $(".close").css("opacity", "1");
+    }
+
     function changeImage($anchor) {
         var $chapter = $anchor.closest(".chapter");
 
         $chapter.find(".right-container").append("<img class='waiting'/>");
+        $chapter.find("img.waiting").attr('src', getImage($anchor.attr("name")));
 
-        $chapter.find("img.waiting").load(function() {
-            // $("#" + parent + " .right-container video").animate({volume: 0}, 300);
-            
-            $chapter.find(".top-layer").fadeOut(2000);
-            $chapter.find("img.waiting").removeClass("waiting").addClass("top-layer");
-            
-        }).attr('src', getImage($anchor.attr("name")));
+        setTimeout(function() {
+           $chapter.find("img.waiting").removeClass("waiting").addClass("top-layer"); 
 
+           setTimeout(function() {
+                $chapter.find(".top-layer").first().remove();
+            }, 300);
+        }, 10);    
     }
 
     function changeVideo($anchor) {
@@ -239,8 +264,13 @@ define([
         var $video = $chapter.find("video.waiting");
         dom.videos.chapters[$chapter.attr("id")] = $video;
 
-        $chapter.find(".top-layer").fadeOut(2000);
-        $chapter.find(".waiting").removeClass("waiting").addClass("top-layer");
+        setTimeout(function() {
+            $chapter.find(".waiting").removeClass("waiting").addClass("top-layer");
+
+            setTimeout(function() {
+                $chapter.find(".top-layer").first().remove();
+            }, 300);
+        }, 10);
     }
 
     function showNav() {
