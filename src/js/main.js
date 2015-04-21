@@ -16,8 +16,10 @@ define([
     var rightTop,
         stickyTop,
         $window = $(window),
+        $body,
         anchorsFired = new Array(),
         mobile = false,
+        tablet = false,
         images = {
             "bob": {
                     "low": "",
@@ -55,13 +57,16 @@ define([
             mainHTML = mainTemplate({}),
             navTemplate = _.template(navTmpl),
             navHTML = navTemplate({});
+            
+        $body = $("body");
 
         $("html").css("overflow-y", "scroll");
 
-        $('body').addClass("intro-visible");
+        $body.addClass("intro-visible");
 
         $(".element-interactive").append(mainHTML)
         $(".element-interactive .story-wrapper").before(navHTML);
+
         saveSelectors();
         initEvents();
     }
@@ -84,24 +89,40 @@ define([
             dom.videos.breaks[$el.parent(".full").attr("id")] = $el;
         });
 
+        dom.videos.intro = $(".intro video");
+
         dom.anchors = {};
         $("a[name]").each(function(i, el) {
             var $el = $(el);
             dom.anchors[$el.attr("name")] = $el;
         });
 
-        dom.nav = {"items": {}}
+        dom.nav = {"items": {}};
         dom.nav['container'] = $(".nav");
-        $(".nav-item").each(function(i, el) {
+        $(".js-nav-item").each(function(i, el) {
             var $el = $(el);
             dom.nav.items[$el.attr("id")] = $el;
         });
+
+        dom.breaks = {};
+        $(".full").each(function(i, el) {
+            var $el = $(el);
+            dom.breaks[$el.attr("id")] = $el;
+        });
+
+        rightTop = $("#chapter-1").children(".right-container").offset().top - $("#chapter-1").offset().top;
+        stickyTop = parseInt($("#css").css("top"), 10);
+
         console.log(dom);
     }
 
     function whatBrowser() {
         if(bowser.mobile) {
             mobile = true;
+        }
+
+        if(bowser.tablet) {
+            tablet = true;
         }
     }
 
@@ -117,12 +138,28 @@ define([
                 videoControl();
                 showNav();
                 anchorsAction();
-            }, 25));
-        } else {
+            }, 15));
+        } 
+
+        $(window).scroll(_.throttle(function() {
+            mobileNav();
+        }, 250));
+
+        if(mobile || tablet) {
             anchorReplace();
         }
+
+        setTimeout(function() {
+            resizeVideos();
+        }, 300);
+
+        $(window).resize(_.debounce(function() {
+                resizeVideos();
+                dom = {};
+                saveSelectors();
+        }, 100));
         
-        $(".intro video").get(0).addEventListener('ended', function(evt) { closeIntro(); }, false); 
+        dom.videos.intro.get(0).addEventListener('ended', function(evt) { closeIntro(); }, false); 
 
         $(".intro .close").on("click", function() {
             closeIntro();
@@ -136,13 +173,11 @@ define([
                 }, 600);
             }, 300);
         });
-
         // initTicker();
     }
 
     function anchorReplace() {
         _.each(dom.anchors, function(val, key) {
-            console.log(key);
             var $el = val;
 
             $el.after("<div class='mobile-alt' style='background-image: url(\"" + getImage($el.data('mobile-alt')) + "\");'></img>");
@@ -154,13 +189,13 @@ define([
         _.each(dom.chapters, function(val, key) {
             var $div = val;
 
-            if($div.offset().top + $div.height() - stickyTop < $window.scrollTop() + $div.children(".right-container").height()) {
+            if($div.offset().top + $div.height() - stickyTop <= $window.scrollTop() + $div.children(".right-container").height()) {
                 $div.children(".right-container").addClass("right-container--bottom");
             } else {
                 $div.children(".right-container").removeClass("right-container--bottom");
             }
 
-            if($div.offset().top - (stickyTop - rightTop) < $window.scrollTop()) {
+            if($div.offset().top - (stickyTop - rightTop) <= $window.scrollTop()) {
                 $div.children(".right-container").addClass("right-container--sticky");
             } else {
                 $div.children(".right-container").removeClass("right-container--sticky");
@@ -172,7 +207,7 @@ define([
         _.each(dom.videos.breaks, function(val, key) {
             var $el = val;
 
-            if($el.offset().top - $window.height() + 250 <= $window.scrollTop() && $window.scrollTop() + 250 < $el.parent().offset().top + $el.parent().height()) {
+            if($el.parent().offset().top - $window.height() + 250 <= $window.scrollTop() && $window.scrollTop() + 250 < $el.parent().offset().top + $el.parent().height()) {
                 $el.parent().css("opacity", "1");
                 $el.get(0).volume = 1;
                 setTimeout(function() {
@@ -186,7 +221,7 @@ define([
                 }, 300);
             }
 
-            if($el.parent().offset().top <= $window.scrollTop()) {
+            if($el.parent().offset().top <= $window.scrollTop() + $window.height()) {
                 $el.css("position", "fixed");
             } else {
                 $el.css("position", "relative");
@@ -202,6 +237,49 @@ define([
                 $el.get(0).pause();
             }
         }, {});
+    }
+
+    function resizeVideos() {
+        console.log(dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].width() / dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].height(), $body.width() / $body.height());
+        if(dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].width() / dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].height() < $body.width() / $body.height()) {
+            $body.addClass("wide");
+
+            _.each(dom.videos.breaks, function($el, key) {
+                $el.css("margin-left", 0);
+            });
+
+            _.each(dom.videos.chapters, function($el, key) {
+                $el.css("margin-left", 0);
+            });
+
+            dom.videos.intro.css("margin-left", 0);
+        } else {
+            $body.removeClass("wide");
+
+            _.each(dom.videos.breaks, function($el, key) {
+                $el.css("margin-left", (-($el.width() - $body.width())/2));
+            });
+
+            _.each(dom.videos.chapters, function($el, key) {
+                $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
+            });
+
+            dom.videos.intro.css("margin-left", (-(dom.videos.intro.width() - $body.width())/2));
+        }
+    }
+
+    function mobileNav() {
+        _.each(dom.breaks, function($el, key) {
+            if($el.offset().top <= $window.scrollTop()) {
+                $(".mobile-nav .center span").html($el.data("nav-name"));
+            }
+
+            if(key === "head-1" && ($el.offset().top + $el.height() - 250 <= $window.scrollTop())) {
+                $(".mobile-nav").addClass("mobile-nav--show");
+            } else if(key === "head-1") {
+                $(".mobile-nav").removeClass("mobile-nav--show");
+            }
+        });
     }
 
     function closeIntro() {
@@ -306,21 +384,23 @@ define([
         _.each(dom.chapters, function(val, key) {
             var $el = val;
 
-            if(showNav != true && $window.scrollTop() > $el.offset().top && $window.scrollTop() < $el.offset().top + $el.height() - $window.height()) {
+            if(showNav != true && $window.scrollTop() >= $el.offset().top && $window.scrollTop() <= $el.offset().top + $el.height() - $window.height()) {
                 showNav = $el.attr("id");
             }
         });
 
         if(showNav !== false) {
-            dom.nav.container.removeClass("nav-hidden");
-
-            _.each(dom.nav.items, function(val, key) {
-                val.removeClass("selected-chapter");
+            _.each(dom.nav.items, function($el, key) {
+                $el.removeClass("previous").removeClass("selected-chapter");
+                if($el.data("nav") <= parseInt(showNav.slice(-1))) {
+                    $el.addClass("previous");
+                }
             });
 
             dom.nav.items["nav-" + showNav].addClass("selected-chapter");
-
+            dom.nav.container.removeClass("nav-hidden");
         } else {
+
             dom.nav.container.addClass("nav-hidden");
         }
     }
