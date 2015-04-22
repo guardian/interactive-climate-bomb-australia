@@ -20,6 +20,7 @@ define([
         anchorsFired = new Array(),
         mobile = false,
         tablet = false,
+        mute = false,
         images = {
             "bob": {
                     "low": "",
@@ -39,12 +40,24 @@ define([
             },
         videos = {
             "video": {
-                    "poster": "@@assetPath@@/imgs/organ-mountains-mod.jpg",
+                    "poster": "@@assetPath@@/imgs/poster.png",
                     "low": "",
                     "medium": "",
-                    "high": "@@assetPath@@/imgs/test.mp4",
+                    "high": "@@assetPath@@/imgs/test6.mp4",
                 }
             },
+        altImages = {
+            "bob": {
+                    "low": "",
+                    "medium": "",
+                    "high": "http://upload.wikimedia.org/wikipedia/commons/0/0b/Miner_in_a_gallery_Potosi_(pixinn.net).jpg",
+                },
+            "second": {
+                    "low": "",
+                    "medium": "",
+                    "high": "http://www.mapsofworld.com/australia/australia-map.gif",
+                }
+        },
         dom = {};
 
     function init(el, context, config, mediator) {
@@ -68,6 +81,7 @@ define([
         $(".element-interactive .story-wrapper").before(navHTML);
 
         saveSelectors();
+
         initEvents();
     }
 
@@ -110,7 +124,10 @@ define([
             dom.breaks[$el.attr("id")] = $el;
         });
 
-        rightTop = $("#chapter-1").children(".right-container").offset().top - $("#chapter-1").offset().top;
+        dom.mobileNav = {};
+        dom.mobileNav['container'] = $(".mobile-nav");
+
+        rightTop = parseInt($(".right-container").not(".right-container--sticky").first().css("top"))
         stickyTop = parseInt($("#css").css("top"), 10);
 
         console.log(dom);
@@ -127,9 +144,6 @@ define([
     }
 
     function initEvents() {
-        rightTop = $("#chapter-1").children(".right-container").offset().top - $("#chapter-1").offset().top;
-        stickyTop = parseInt($("#css").css("top"), 10);
-
         preLoad();
 
         if(!mobile) {
@@ -145,17 +159,20 @@ define([
             mobileNav();
         }, 250));
 
-        if(mobile || tablet) {
+        if((mobile || tablet) || $window.width() < 1040) {
             anchorReplace();
         }
 
-        setTimeout(function() {
-            resizeVideos();
-        }, 300);
+        if(mobile) {
+            breaksReplace();
+        }
 
-        $(window).resize(_.debounce(function() {
+        dom.videos.intro.get(0).addEventListener('loadeddata', function() {
+            resizeVideos();
+        }, false);
+
+        $(window).resize(_.throttle(function() {
                 resizeVideos();
-                dom = {};
                 saveSelectors();
         }, 100));
         
@@ -173,6 +190,10 @@ define([
                 }, 600);
             }, 300);
         });
+
+        $(".js-mute").on("click", function() {
+            muteVideo();
+        });
         // initTicker();
     }
 
@@ -180,9 +201,19 @@ define([
         _.each(dom.anchors, function(val, key) {
             var $el = val;
 
-            $el.after("<div class='mobile-alt' style='background-image: url(\"" + getImage($el.data('mobile-alt')) + "\");'></img>");
+            $el.after("<div class='mobile-alt' style='background-image: url(\"" + getAltImage($el.data('mobile-alt')) + "\");'></img>");
             $el.remove();
         });
+    }
+
+    function breaksReplace() {
+        _.each(dom.breaks, function($el, key) {
+            $el.find("video").remove();
+            $el.css("background-image", "url('" + getAltImage($el.data('mobile-alt')) + "')");
+        });
+        dom.videos.intro.parent().css("background-image", "url('" + getAltImage(dom.videos.intro.parent().data('mobile-alt')) + "')");
+        dom.videos.intro.remove();
+
     }
 
     function stickDivs() {
@@ -239,8 +270,29 @@ define([
         }, {});
     }
 
+    function muteVideo() {
+        mute = (mute) ? false : true;
+        _.each(dom.videos.breaks, function($el, key) {
+            $el.get(0).muted = mute;
+        });
+        _.each(dom.videos.chapters, function($el, key) {
+            $el.get(0).muted = mute;
+        });
+
+        if(dom.videos.intro.get(0)) {
+            dom.videos.intro.get(0).muted = mute;
+        }
+
+        if(mute === true) {
+            $(".js-mute-text").html("Unmute");
+            $(".mute").addClass("muted");
+        } else {
+            $(".js-mute-text").html("Mute");
+            $(".mute").removeClass("muted");
+        }
+    }
+
     function resizeVideos() {
-        console.log(dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].width() / dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].height(), $body.width() / $body.height());
         if(dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].width() / dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].height() < $body.width() / $body.height()) {
             $body.addClass("wide");
 
@@ -269,17 +321,19 @@ define([
     }
 
     function mobileNav() {
+        var section = "";
         _.each(dom.breaks, function($el, key) {
             if($el.offset().top <= $window.scrollTop()) {
-                $(".mobile-nav .center span").html($el.data("nav-name"));
+                section = $el.data("nav-name");
             }
 
             if(key === "head-1" && ($el.offset().top + $el.height() - 250 <= $window.scrollTop())) {
-                $(".mobile-nav").addClass("mobile-nav--show");
+                dom.mobileNav.container.addClass("mobile-nav--show");
             } else if(key === "head-1") {
-                $(".mobile-nav").removeClass("mobile-nav--show");
+                dom.mobileNav.container.removeClass("mobile-nav--show");
             }
         });
+        dom.mobileNav.container.find(".change").html(section);
     }
 
     function closeIntro() {
@@ -339,6 +393,15 @@ define([
             }
             key.src = val.high;
         });
+
+        if(mobile || tablet) {
+            _.each(altImages, function(val, key) {
+                var key = new Image(1,1);
+                key.onload = function() {
+                }
+                key.src = val.high;
+            });
+        }
     }
 
     function onLoaded() {
@@ -362,8 +425,9 @@ define([
 
     function changeVideo($anchor) {
         var $chapter = $anchor.closest(".chapter");
+        var mutedTag = (mute) ? "muted" : "";
 
-        $chapter.find(".right-container").append("<video class='waiting' preload='auto' autoplay muted poster='" + getVideo($anchor.attr("name")).poster + "'></video>");
+        $chapter.find(".right-container").append("<video class='waiting' preload='auto' autoplay " + mutedTag + " poster='" + getVideo($anchor.attr("name")).poster + "'></video>");
         $chapter.find("video.waiting").attr('src', getVideo($anchor.attr("name")).video);
 
         var $video = $chapter.find("video.waiting");
@@ -400,13 +464,25 @@ define([
             dom.nav.items["nav-" + showNav].addClass("selected-chapter");
             dom.nav.container.removeClass("nav-hidden");
         } else {
-
             dom.nav.container.addClass("nav-hidden");
+            setTimeout(function() {
+                if(dom.nav.container.hasClass("nav-hidden")) {
+                    _.each(dom.nav.items, function($el, key) {
+                        $el.removeClass("previous").removeClass("selected-chapter");
+                    });
+                }
+            }, 300);
         }
     }
 
     function getImage(name) {
         var src = images[name].high;
+
+        return src;
+    }
+
+    function getAltImage(name) {
+        var src = altImages[name].high;
 
         return src;
     }
