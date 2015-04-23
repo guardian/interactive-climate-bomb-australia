@@ -127,7 +127,7 @@ define([
         dom.mobileNav = {};
         dom.mobileNav['container'] = $(".mobile-nav");
 
-        rightTop = parseInt($(".right-container").not(".right-container--sticky").first().css("top"))
+        rightTop = parseInt($("#css-rc").css("top"));
         stickyTop = parseInt($("#css").css("top"), 10);
 
         console.log(dom);
@@ -157,6 +157,7 @@ define([
 
         $(window).scroll(_.throttle(function() {
             mobileNav();
+            console.log(rightTop);
         }, 250));
 
         if((mobile || tablet) || $window.width() < 1040) {
@@ -325,6 +326,8 @@ define([
         _.each(dom.breaks, function($el, key) {
             if($el.offset().top <= $window.scrollTop()) {
                 section = $el.data("nav-name");
+            } else {
+                
             }
 
             if(key === "head-1" && ($el.offset().top + $el.height() - 250 <= $window.scrollTop())) {
