@@ -18,6 +18,9 @@ define([
         $window = $(window),
         $body,
         anchorsFired = new Array(),
+        currentAnchor,
+        currentAnchor2,
+        currentAnchor3,
         mobile = false,
         tablet = false,
         mute = false,
@@ -44,8 +47,14 @@ define([
                     "low": "",
                     "medium": "",
                     "high": "@@assetPath@@/imgs/test6.mp4",
-                }
             },
+            "loop": {
+                    "poster": "@@assetPath@@/imgs/poster.png",
+                    "low": "",
+                    "medium": "",
+                    "high": "@@assetPath@@/imgs/loop.mp4",
+            }
+        },
         altImages = {
             "bob": {
                     "low": "",
@@ -105,10 +114,21 @@ define([
 
         dom.videos.intro = $(".intro video");
 
-        dom.anchors = {};
-        $("a[name]").each(function(i, el) {
+        dom.anchors = {"chapter1": {}, "chapter2": {}, "chapter3": {}};
+
+        $("#chapter-1 a[name]").each(function(i, el) {
             var $el = $(el);
-            dom.anchors[$el.attr("name")] = $el;
+            dom.anchors.chapter1[$el.attr("name")] = $el;
+        });
+
+        $("#chapter-2 a[name]").each(function(i, el) {
+            var $el = $(el);
+            dom.anchors.chapter2[$el.attr("name")] = $el;
+        });
+
+        $("#chapter-3 a[name]").each(function(i, el) {
+            var $el = $(el);
+            dom.anchors.chapter3[$el.attr("name")] = $el;
         });
 
         dom.nav = {"items": {}};
@@ -122,6 +142,12 @@ define([
         $(".full").each(function(i, el) {
             var $el = $(el);
             dom.breaks[$el.attr("id")] = $el;
+        });
+
+        dom.text = {};
+        $(".text--content").each(function(i, el) {
+            var $el = $(el);
+            dom.text[$el.closest(".int-main").attr("id")] = $el;
         });
 
         dom.mobileNav = {};
@@ -157,7 +183,6 @@ define([
 
         $(window).scroll(_.throttle(function() {
             mobileNav();
-            console.log(rightTop);
         }, 250));
 
         if((mobile || tablet) || $window.width() < 1040) {
@@ -364,24 +389,104 @@ define([
     //     },250);
     // }
 
+    // function anchorsAction() { 
+    //     _.each(dom.anchors, function(val, key) {
+    //         var $el = val;
+
+    //         if($.inArray($el.attr("name"), anchorsFired) < 0 && $el.offset().top - 200 < $window.scrollTop()) {
+    //             var parent = $el.closest(".main").attr("id");
+
+    //             if($el.data("type") === "video") {
+    //                 changeVideo($el);
+    //             } 
+
+    //             if($el.data("type") === "image") {
+    //                 changeImage($el);
+    //             }
+
+    //             anchorsFired[anchorsFired.length] = $el.attr("name");
+    //         }
+    //     });
+    // }
+
     function anchorsAction() { 
-        _.each(dom.anchors, function(val, key) {
+        var $lastAnchor;
+
+        _.each(dom.anchors.chapter1, function(val, key) {
             var $el = val;
-
-            if($.inArray($el.attr("name"), anchorsFired) < 0 && $el.offset().top - 200 < $window.scrollTop()) {
-                var parent = $el.closest(".main").attr("id");
-
-                if($el.data("type") === "video") {
-                    changeVideo($el);
-                } 
-
-                if($el.data("type") === "image") {
-                    changeImage($el);
-                }
-
-                anchorsFired[anchorsFired.length] = $el.attr("name");
+            if($el.offset().top - 200 < $window.scrollTop()) {
+                $lastAnchor = $el;
             }
         });
+
+        if($lastAnchor && currentAnchor !== $lastAnchor) {
+            dom.text['chapter-1'].removeClass("first");
+
+            if($lastAnchor.data("type") === "video") {
+                changeVideo($lastAnchor);
+            } 
+
+            if($lastAnchor.data("type") === "image") {
+                changeImage($lastAnchor);
+            }
+
+            currentAnchor = $lastAnchor;
+        } else if(!$lastAnchor && !dom.text['chapter-1'].hasClass("first")) {
+            dom.text['chapter-1'].addClass("first");
+            changeVideo(dom.text['chapter-1']);
+        }
+
+        var $lastAnchor2;
+
+        _.each(dom.anchors.chapter2, function(val, key) {
+            var $el = val;
+            if($el.offset().top - 200 < $window.scrollTop()) {
+                $lastAnchor2 = $el;
+            }
+        });
+
+        if($lastAnchor2 && currentAnchor2 !== $lastAnchor2) {
+            dom.text['chapter-2'].removeClass("first");
+
+            if($lastAnchor2.data("type") === "video") {
+                changeVideo($lastAnchor2);
+            } 
+
+            if($lastAnchor2.data("type") === "image") {
+                changeImage($lastAnchor2);
+            }
+
+            currentAnchor2 = $lastAnchor2;
+        } else if(!$lastAnchor2 && !dom.text['chapter-2'].hasClass("first")) {
+            dom.text['chapter-2'].addClass("first");
+            changeVideo(dom.text['chapter-2']);
+        }
+
+        var $lastAnchor3;
+
+        _.each(dom.anchors.chapter3, function(val, key) {
+            var $el = val;
+            if($el.offset().top - 200 < $window.scrollTop()) {
+                $lastAnchor3 = $el;
+            }
+        });
+
+        if($lastAnchor3 && currentAnchor3 !== $lastAnchor3) {
+            dom.text['chapter-3'].removeClass("first");
+
+            if($lastAnchor3.data("type") === "video") {
+                changeVideo($lastAnchor3);
+            } 
+
+            if($lastAnchor3.data("type") === "image") {
+                changeImage($lastAnchor3);
+            }
+
+            currentAnchor3 = $lastAnchor3;
+        } else if(!$lastAnchor3 && !dom.text['chapter-3'].hasClass("first")) {
+            dom.text['chapter-3'].addClass("first");
+            changeVideo(dom.text['chapter-3']);
+        }
     }
 
     function preLoad() {
@@ -433,7 +538,7 @@ define([
         $chapter.find(".right-container").append("<video class='waiting' preload='auto' autoplay " + mutedTag + " poster='" + getVideo($anchor.attr("name")).poster + "'></video>");
         $chapter.find("video.waiting").attr('src', getVideo($anchor.attr("name")).video);
 
-        var $video = $chapter.find("video.waiting");
+        var $video = $chapter.find("video.waiting").last();
         dom.videos.chapters[$chapter.attr("id")] = $video;
 
         setTimeout(function() {
