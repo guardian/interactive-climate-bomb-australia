@@ -18,9 +18,8 @@ define([
         $window = $(window),
         $body,
         anchorsFired = new Array(),
-        currentAnchor,
-        currentAnchor2,
-        currentAnchor3,
+        currentAnchors = {},
+        lastAnchors = {},
         mobile = false,
         tablet = false,
         mute = false,
@@ -114,21 +113,21 @@ define([
 
         dom.videos.intro = $(".intro video");
 
-        dom.anchors = {"chapter1": {}, "chapter2": {}, "chapter3": {}};
+        dom.anchors = {"chapter-1": {}, "chapter-2": {}, "chapter-3": {}};
 
         $("#chapter-1 a[name]").each(function(i, el) {
             var $el = $(el);
-            dom.anchors.chapter1[$el.attr("name")] = $el;
+            dom.anchors['chapter-1'][$el.attr("name")] = $el;
         });
 
         $("#chapter-2 a[name]").each(function(i, el) {
             var $el = $(el);
-            dom.anchors.chapter2[$el.attr("name")] = $el;
+            dom.anchors['chapter-2'][$el.attr("name")] = $el;
         });
 
         $("#chapter-3 a[name]").each(function(i, el) {
             var $el = $(el);
-            dom.anchors.chapter3[$el.attr("name")] = $el;
+            dom.anchors['chapter-3'][$el.attr("name")] = $el;
         });
 
         dom.nav = {"items": {}};
@@ -410,83 +409,34 @@ define([
     // }
 
     function anchorsAction() { 
-        var $lastAnchor;
+        _.each(dom.chapters, function(el, chapterName) {
+            lastAnchors[chapterName] = "";
 
-        _.each(dom.anchors.chapter1, function(val, key) {
-            var $el = val;
-            if($el.offset().top - 200 < $window.scrollTop()) {
-                $lastAnchor = $el;
+            _.each(dom.anchors[chapterName], function(val, key) {
+                var $el = val;
+                if($el.offset().top - 200 < $window.scrollTop()) {
+                    lastAnchors[chapterName] = $el;
+                }
+            });
+
+            if(lastAnchors[chapterName] !== "" && currentAnchors[chapterName] !== lastAnchors[chapterName]) {
+                dom.text[chapterName].removeClass("first");
+
+                if(lastAnchors[chapterName].data("type") === "video") {
+                    changeVideo(lastAnchors[chapterName]);
+                } 
+
+                if(lastAnchors[chapterName].data("type") === "image") {
+                    changeImage(lastAnchors[chapterName]);
+                }
+
+                currentAnchors[chapterName] = lastAnchors[chapterName];
+
+            } else if(lastAnchors[chapterName] === "" && !dom.text[chapterName].hasClass("first")) {
+                dom.text[chapterName].addClass("first");
+                changeVideo(dom.text[chapterName]);
             }
         });
-
-        if($lastAnchor && currentAnchor !== $lastAnchor) {
-            dom.text['chapter-1'].removeClass("first");
-
-            if($lastAnchor.data("type") === "video") {
-                changeVideo($lastAnchor);
-            } 
-
-            if($lastAnchor.data("type") === "image") {
-                changeImage($lastAnchor);
-            }
-
-            currentAnchor = $lastAnchor;
-        } else if(!$lastAnchor && !dom.text['chapter-1'].hasClass("first")) {
-            dom.text['chapter-1'].addClass("first");
-            changeVideo(dom.text['chapter-1']);
-        }
-
-        var $lastAnchor2;
-
-        _.each(dom.anchors.chapter2, function(val, key) {
-            var $el = val;
-            if($el.offset().top - 200 < $window.scrollTop()) {
-                $lastAnchor2 = $el;
-            }
-        });
-
-        if($lastAnchor2 && currentAnchor2 !== $lastAnchor2) {
-            dom.text['chapter-2'].removeClass("first");
-
-            if($lastAnchor2.data("type") === "video") {
-                changeVideo($lastAnchor2);
-            } 
-
-            if($lastAnchor2.data("type") === "image") {
-                changeImage($lastAnchor2);
-            }
-
-            currentAnchor2 = $lastAnchor2;
-        } else if(!$lastAnchor2 && !dom.text['chapter-2'].hasClass("first")) {
-            dom.text['chapter-2'].addClass("first");
-            changeVideo(dom.text['chapter-2']);
-        }
-
-        var $lastAnchor3;
-
-        _.each(dom.anchors.chapter3, function(val, key) {
-            var $el = val;
-            if($el.offset().top - 200 < $window.scrollTop()) {
-                $lastAnchor3 = $el;
-            }
-        });
-
-        if($lastAnchor3 && currentAnchor3 !== $lastAnchor3) {
-            dom.text['chapter-3'].removeClass("first");
-
-            if($lastAnchor3.data("type") === "video") {
-                changeVideo($lastAnchor3);
-            } 
-
-            if($lastAnchor3.data("type") === "image") {
-                changeImage($lastAnchor3);
-            }
-
-            currentAnchor3 = $lastAnchor3;
-        } else if(!$lastAnchor3 && !dom.text['chapter-3'].hasClass("first")) {
-            dom.text['chapter-3'].addClass("first");
-            changeVideo(dom.text['chapter-3']);
-        }
     }
 
     function preLoad() {
