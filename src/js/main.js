@@ -42,16 +42,16 @@ define([
             },
         videos = {
             "video": {
-                    "poster": "@@assetPath@@/imgs/poster.png",
+                    "poster": "@@assetPath@@/videos/posters/poster.png",
                     "low": "",
                     "medium": "",
-                    "high": "@@assetPath@@/imgs/test6.mp4",
+                    "high": "@@assetPath@@/videos/test6.mp4",
             },
             "loop": {
-                    "poster": "@@assetPath@@/imgs/poster.png",
+                    "poster": "@@assetPath@@/videos/posters/poster.png",
                     "low": "",
                     "medium": "",
-                    "high": "@@assetPath@@/imgs/loop.mp4",
+                    "high": "@@assetPath@@/videos/loop.mp4",
             }
         },
         altImages = {
@@ -80,11 +80,8 @@ define([
             navHTML = navTemplate({});
             
         $body = $("body");
-
         $("html").css("overflow-y", "scroll");
-
-        $body.addClass("intro-visible");
-
+        
         $(".element-interactive").append(mainHTML)
         $(".element-interactive .story-wrapper").before(navHTML);
 
@@ -192,7 +189,7 @@ define([
             breaksReplace();
         }
 
-        dom.videos.intro.get(0).addEventListener('loadeddata', function() {
+        dom.videos.chapters['chapter-1'].get(0).addEventListener('loadeddata', function() {
             resizeVideos();
         }, false);
 
@@ -201,20 +198,20 @@ define([
                 saveSelectors();
         }, 100));
         
-        dom.videos.intro.get(0).addEventListener('ended', function(evt) { closeIntro(); }, false); 
+        // dom.videos.chapters['chapter-1'].get(0).addEventListener('ended', function(evt) { closeIntro(); }, false); 
 
-        $(".intro .close").on("click", function() {
-            closeIntro();
-            $(".title-box").addClass("s-1");
+        // $(".intro .close").on("click", function() {
+        //     closeIntro();
+        //     $(".title-box").addClass("s-1");
 
-            setTimeout(function() {
-                $(".title-box").addClass("s-2");
+        //     setTimeout(function() {
+        //         $(".title-box").addClass("s-2");
 
-                setTimeout(function() {
-                    $(".title-box").addClass("s-3");
-                }, 600);
-            }, 300);
-        });
+        //         setTimeout(function() {
+        //             $(".title-box").addClass("s-3");
+        //         }, 600);
+        //     }, 300);
+        // });
 
         $(".js-mute").on("click", function() {
             muteVideo();
@@ -277,11 +274,11 @@ define([
                 }, 300);
             }
 
-            if($el.parent().offset().top <= $window.scrollTop() + $window.height()) {
-                $el.css("position", "fixed");
-            } else {
-                $el.css("position", "relative");
-            }
+            // if($el.parent().offset().top <= $window.scrollTop() + $window.height()) {
+            //     $el.css("position", "fixed");
+            // } else {
+            //     $el.css("position", "relative");
+            // }
         });
 
         _.each(dom.videos.chapters, function(val, key) {
@@ -326,7 +323,7 @@ define([
             });
 
             _.each(dom.videos.chapters, function($el, key) {
-                $el.css("margin-left", 0);
+                $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
             });
 
             dom.videos.intro.css("margin-left", 0);

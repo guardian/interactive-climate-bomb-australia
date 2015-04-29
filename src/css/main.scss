@@ -189,9 +189,7 @@ body {
 	a {
 		height: 1px;
 		border: 0;
-		border-bottom: 1px solid red;
-		width: 100%;
-		display: block;
+		border-bottom: solid 1px red;
 	}
 }
 
@@ -203,7 +201,6 @@ body {
 	overflow: hidden;
 	margin-left: 0px;
 	top: 40px;
-	border-radius: 12px;
 	transform: translateZ(0);
 	display: none;
 
@@ -250,7 +247,7 @@ body {
 		height: 100%;
 		display: block;
 		overflow: hidden;
-		margin-left: -350px;
+		margin-left: -309px;
 	}
 
 	img {
@@ -301,8 +298,8 @@ body {
 	}
 
 	video {
-		height: 100%;
 		width: auto;
+		height: 100%;
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -453,6 +450,7 @@ body {
 	z-index: 101;
 	width: 95px;
 	top: 0;
+	display: none !important;
 	right: 0;
 	color: #000;
 	opacity: 1;
