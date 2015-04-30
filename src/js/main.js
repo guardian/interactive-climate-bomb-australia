@@ -20,6 +20,7 @@ define([
         anchorsFired = new Array(),
         currentAnchors = {},
         lastAnchors = {},
+        currentChapter,
         mobile = false,
         tablet = false,
         mute = false,
@@ -147,7 +148,7 @@ define([
         });
 
         dom.mobileNav = {};
-        dom.mobileNav['container'] = $(".mobile-nav");
+        dom.mobileNav['container'] = $(".nav");
 
         rightTop = parseInt($("#css-rc").css("top"));
         stickyTop = parseInt($("#css").css("top"), 10);
@@ -170,16 +171,17 @@ define([
 
         if(!mobile) {
             $(window).scroll(_.throttle(function() {
+                // $(".chapter-intro").toggleClass("chapter-intro-animate");
                 stickDivs();
                 videoControl();
-                showNav();
+                // showNav();
                 anchorsAction();
             }, 15));
         } 
 
         $(window).scroll(_.throttle(function() {
             mobileNav();
-        }, 250));
+        }, 15));
 
         if((mobile || tablet) || $window.width() < 1040) {
             anchorReplace();
@@ -221,6 +223,7 @@ define([
 
     function anchorReplace() {
         _.each(dom.anchors, function(val, key) {
+            console.log(key);
             var $el = val;
 
             $el.after("<div class='mobile-alt' style='background-image: url(\"" + getAltImage($el.data('mobile-alt')) + "\");'></img>");
@@ -261,13 +264,13 @@ define([
             var $el = val;
 
             if($el.parent().offset().top - $window.height() + 250 <= $window.scrollTop() && $window.scrollTop() + 250 < $el.parent().offset().top + $el.parent().height()) {
-                $el.parent().css("opacity", "1");
+                // $el.parent().css("opacity", "1");
                 $el.get(0).volume = 1;
                 setTimeout(function() {
                     $el.get(0).play();
                 }, 300);
             } else {
-                $el.parent().css("opacity", "0");
+                // $el.parent().css("opacity", "0");
                 $el.get(0).volume = 0;
                 setTimeout(function() {
                     $el.get(0).pause();
@@ -316,7 +319,7 @@ define([
 
     function resizeVideos() {
         if(dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].width() / dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].height() < $body.width() / $body.height()) {
-            $body.addClass("wide");
+            $body.removeClass("non-wide");
 
             _.each(dom.videos.breaks, function($el, key) {
                 $el.css("margin-left", 0);
@@ -328,7 +331,7 @@ define([
 
             dom.videos.intro.css("margin-left", 0);
         } else {
-            $body.removeClass("wide");
+            $body.addClass("non-wide");
 
             _.each(dom.videos.breaks, function($el, key) {
                 $el.css("margin-left", (-($el.width() - $body.width())/2));
@@ -346,17 +349,24 @@ define([
         var section = "";
         _.each(dom.breaks, function($el, key) {
             if($el.offset().top <= $window.scrollTop()) {
-                section = $el.data("nav-name");
-            } else {
-                
+                if(key !== currentChapter) {
+                    section = key;
+                    currentChapter = key;
+                }
             }
 
-            if(key === "head-1" && ($el.offset().top + $el.height() - 250 <= $window.scrollTop())) {
-                dom.mobileNav.container.addClass("mobile-nav--show");
+            if(key === "head-1" && ($el.offset().top + $el.height() <= $window.scrollTop())) {
+                dom.mobileNav.container.addClass("nav--show");
             } else if(key === "head-1") {
-                dom.mobileNav.container.removeClass("mobile-nav--show");
+                dom.mobileNav.container.removeClass("nav--show");
             }
         });
+
+        if(section) {
+            $(".nav-chapter--selected").removeClass("nav-chapter--selected");
+            $("#nav-chapter-" + section.slice(-1)).addClass("nav-chapter--selected");
+        }
+
         dom.mobileNav.container.find(".change").html(section);
     }
 
