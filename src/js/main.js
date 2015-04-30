@@ -18,6 +18,9 @@ define([
         $window = $(window),
         $body,
         anchorsFired = new Array(),
+        currentAnchors = {},
+        lastAnchors = {},
+        currentChapter,
         mobile = false,
         tablet = false,
         mute = false,
@@ -40,12 +43,18 @@ define([
             },
         videos = {
             "video": {
-                    "poster": "@@assetPath@@/imgs/poster.png",
+                    "poster": "@@assetPath@@/videos/posters/poster.png",
                     "low": "",
                     "medium": "",
-                    "high": "@@assetPath@@/imgs/test6.mp4",
-                }
+                    "high": "@@assetPath@@/videos/test6.mp4",
             },
+            "loop": {
+                    "poster": "@@assetPath@@/videos/posters/poster.png",
+                    "low": "",
+                    "medium": "",
+                    "high": "@@assetPath@@/videos/loop.mp4",
+            }
+        },
         altImages = {
             "bob": {
                     "low": "",
@@ -72,11 +81,8 @@ define([
             navHTML = navTemplate({});
             
         $body = $("body");
-
         $("html").css("overflow-y", "scroll");
-
-        $body.addClass("intro-visible");
-
+        
         $(".element-interactive").append(mainHTML)
         $(".element-interactive .story-wrapper").before(navHTML);
 
@@ -105,10 +111,21 @@ define([
 
         dom.videos.intro = $(".intro video");
 
-        dom.anchors = {};
-        $("a[name]").each(function(i, el) {
+        dom.anchors = {"chapter-1": {}, "chapter-2": {}, "chapter-3": {}};
+
+        $("#chapter-1 a[name]").each(function(i, el) {
             var $el = $(el);
-            dom.anchors[$el.attr("name")] = $el;
+            dom.anchors['chapter-1'][$el.attr("name")] = $el;
+        });
+
+        $("#chapter-2 a[name]").each(function(i, el) {
+            var $el = $(el);
+            dom.anchors['chapter-2'][$el.attr("name")] = $el;
+        });
+
+        $("#chapter-3 a[name]").each(function(i, el) {
+            var $el = $(el);
+            dom.anchors['chapter-3'][$el.attr("name")] = $el;
         });
 
         dom.nav = {"items": {}};
@@ -124,10 +141,16 @@ define([
             dom.breaks[$el.attr("id")] = $el;
         });
 
-        dom.mobileNav = {};
-        dom.mobileNav['container'] = $(".mobile-nav");
+        dom.text = {};
+        $(".text--content").each(function(i, el) {
+            var $el = $(el);
+            dom.text[$el.closest(".int-main").attr("id")] = $el;
+        });
 
-        rightTop = parseInt($(".right-container").not(".right-container--sticky").first().css("top"))
+        dom.mobileNav = {};
+        dom.mobileNav['container'] = $(".nav");
+
+        rightTop = parseInt($("#css-rc").css("top"));
         stickyTop = parseInt($("#css").css("top"), 10);
 
         console.log(dom);
@@ -148,16 +171,17 @@ define([
 
         if(!mobile) {
             $(window).scroll(_.throttle(function() {
+                // $(".chapter-intro").toggleClass("chapter-intro-animate");
                 stickDivs();
                 videoControl();
-                showNav();
+                // showNav();
                 anchorsAction();
             }, 15));
         } 
 
         $(window).scroll(_.throttle(function() {
             mobileNav();
-        }, 250));
+        }, 15));
 
         if((mobile || tablet) || $window.width() < 1040) {
             anchorReplace();
@@ -167,7 +191,7 @@ define([
             breaksReplace();
         }
 
-        dom.videos.intro.get(0).addEventListener('loadeddata', function() {
+        dom.videos.chapters['chapter-1'].get(0).addEventListener('loadeddata', function() {
             resizeVideos();
         }, false);
 
@@ -176,20 +200,20 @@ define([
                 saveSelectors();
         }, 100));
         
-        dom.videos.intro.get(0).addEventListener('ended', function(evt) { closeIntro(); }, false); 
+        // dom.videos.chapters['chapter-1'].get(0).addEventListener('ended', function(evt) { closeIntro(); }, false); 
 
-        $(".intro .close").on("click", function() {
-            closeIntro();
-            $(".title-box").addClass("s-1");
+        // $(".intro .close").on("click", function() {
+        //     closeIntro();
+        //     $(".title-box").addClass("s-1");
 
-            setTimeout(function() {
-                $(".title-box").addClass("s-2");
+        //     setTimeout(function() {
+        //         $(".title-box").addClass("s-2");
 
-                setTimeout(function() {
-                    $(".title-box").addClass("s-3");
-                }, 600);
-            }, 300);
-        });
+        //         setTimeout(function() {
+        //             $(".title-box").addClass("s-3");
+        //         }, 600);
+        //     }, 300);
+        // });
 
         $(".js-mute").on("click", function() {
             muteVideo();
@@ -199,6 +223,7 @@ define([
 
     function anchorReplace() {
         _.each(dom.anchors, function(val, key) {
+            console.log(key);
             var $el = val;
 
             $el.after("<div class='mobile-alt' style='background-image: url(\"" + getAltImage($el.data('mobile-alt')) + "\");'></img>");
@@ -239,24 +264,24 @@ define([
             var $el = val;
 
             if($el.parent().offset().top - $window.height() + 250 <= $window.scrollTop() && $window.scrollTop() + 250 < $el.parent().offset().top + $el.parent().height()) {
-                $el.parent().css("opacity", "1");
+                // $el.parent().css("opacity", "1");
                 $el.get(0).volume = 1;
                 setTimeout(function() {
                     $el.get(0).play();
                 }, 300);
             } else {
-                $el.parent().css("opacity", "0");
+                // $el.parent().css("opacity", "0");
                 $el.get(0).volume = 0;
                 setTimeout(function() {
                     $el.get(0).pause();
                 }, 300);
             }
 
-            if($el.parent().offset().top <= $window.scrollTop() + $window.height()) {
-                $el.css("position", "fixed");
-            } else {
-                $el.css("position", "relative");
-            }
+            // if($el.parent().offset().top <= $window.scrollTop() + $window.height()) {
+            //     $el.css("position", "fixed");
+            // } else {
+            //     $el.css("position", "relative");
+            // }
         });
 
         _.each(dom.videos.chapters, function(val, key) {
@@ -294,19 +319,19 @@ define([
 
     function resizeVideos() {
         if(dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].width() / dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].height() < $body.width() / $body.height()) {
-            $body.addClass("wide");
+            $body.removeClass("non-wide");
 
             _.each(dom.videos.breaks, function($el, key) {
                 $el.css("margin-left", 0);
             });
 
             _.each(dom.videos.chapters, function($el, key) {
-                $el.css("margin-left", 0);
+                $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
             });
 
             dom.videos.intro.css("margin-left", 0);
         } else {
-            $body.removeClass("wide");
+            $body.addClass("non-wide");
 
             _.each(dom.videos.breaks, function($el, key) {
                 $el.css("margin-left", (-($el.width() - $body.width())/2));
@@ -324,15 +349,24 @@ define([
         var section = "";
         _.each(dom.breaks, function($el, key) {
             if($el.offset().top <= $window.scrollTop()) {
-                section = $el.data("nav-name");
+                if(key !== currentChapter) {
+                    section = key;
+                    currentChapter = key;
+                }
             }
 
-            if(key === "head-1" && ($el.offset().top + $el.height() - 250 <= $window.scrollTop())) {
-                dom.mobileNav.container.addClass("mobile-nav--show");
+            if(key === "head-1" && ($el.offset().top + $el.height() <= $window.scrollTop())) {
+                dom.mobileNav.container.addClass("nav--show");
             } else if(key === "head-1") {
-                dom.mobileNav.container.removeClass("mobile-nav--show");
+                dom.mobileNav.container.removeClass("nav--show");
             }
         });
+
+        if(section) {
+            $(".nav-chapter--selected").removeClass("nav-chapter--selected");
+            $("#nav-chapter-" + section.slice(-1)).addClass("nav-chapter--selected");
+        }
+
         dom.mobileNav.container.find(".change").html(section);
     }
 
@@ -361,22 +395,53 @@ define([
     //     },250);
     // }
 
+    // function anchorsAction() { 
+    //     _.each(dom.anchors, function(val, key) {
+    //         var $el = val;
+
+    //         if($.inArray($el.attr("name"), anchorsFired) < 0 && $el.offset().top - 200 < $window.scrollTop()) {
+    //             var parent = $el.closest(".main").attr("id");
+
+    //             if($el.data("type") === "video") {
+    //                 changeVideo($el);
+    //             } 
+
+    //             if($el.data("type") === "image") {
+    //                 changeImage($el);
+    //             }
+
+    //             anchorsFired[anchorsFired.length] = $el.attr("name");
+    //         }
+    //     });
+    // }
+
     function anchorsAction() { 
-        _.each(dom.anchors, function(val, key) {
-            var $el = val;
+        _.each(dom.chapters, function(el, chapterName) {
+            lastAnchors[chapterName] = "";
 
-            if($.inArray($el.attr("name"), anchorsFired) < 0 && $el.offset().top - 200 < $window.scrollTop()) {
-                var parent = $el.closest(".main").attr("id");
+            _.each(dom.anchors[chapterName], function(val, key) {
+                var $el = val;
+                if($el.offset().top - 200 < $window.scrollTop()) {
+                    lastAnchors[chapterName] = $el;
+                }
+            });
 
-                if($el.data("type") === "video") {
-                    changeVideo($el);
+            if(lastAnchors[chapterName] !== "" && currentAnchors[chapterName] !== lastAnchors[chapterName]) {
+                dom.text[chapterName].removeClass("first");
+
+                if(lastAnchors[chapterName].data("type") === "video") {
+                    changeVideo(lastAnchors[chapterName]);
                 } 
 
-                if($el.data("type") === "image") {
-                    changeImage($el);
+                if(lastAnchors[chapterName].data("type") === "image") {
+                    changeImage(lastAnchors[chapterName]);
                 }
 
-                anchorsFired[anchorsFired.length] = $el.attr("name");
+                currentAnchors[chapterName] = lastAnchors[chapterName];
+
+            } else if(lastAnchors[chapterName] === "" && !dom.text[chapterName].hasClass("first")) {
+                dom.text[chapterName].addClass("first");
+                changeVideo(dom.text[chapterName]);
             }
         });
     }
@@ -430,7 +495,7 @@ define([
         $chapter.find(".right-container").append("<video class='waiting' preload='auto' autoplay " + mutedTag + " poster='" + getVideo($anchor.attr("name")).poster + "'></video>");
         $chapter.find("video.waiting").attr('src', getVideo($anchor.attr("name")).video);
 
-        var $video = $chapter.find("video.waiting");
+        var $video = $chapter.find("video.waiting").last();
         dom.videos.chapters[$chapter.attr("id")] = $video;
 
         setTimeout(function() {
