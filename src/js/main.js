@@ -24,6 +24,8 @@ define([
         mobile = false,
         tablet = false,
         mute = false,
+        ticking = false,
+        latestKnownScrollY = 0,
         images = {
             "bob": {
                     "low": "",
@@ -53,7 +55,97 @@ define([
                     "low": "",
                     "medium": "",
                     "high": "@@assetPath@@/videos/loop.mp4",
-            }
+            },
+            "chapter1-1": {
+                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq1.webmsd.png",
+                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq1.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter1-2": {
+                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq2.webmsd.png",
+                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq2.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter1-3": {
+                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq3.webmsd.png",
+                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq3.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter1-4": {
+                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq4.webmsd.png",
+                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq4.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter1-5": {
+                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq5.webmsd.png",
+                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq5.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter1-6": {
+                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq6.webmsd.png",
+                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq6.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter1-7": {
+                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq7.webmsd.png",
+                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq7.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter2-1": {
+                "poster": "",
+                "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq1.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter2-2": {
+                "poster": "",
+                "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq2.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter2-3": {
+                "poster": "",
+                "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq3.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter2-4": {
+                "poster": "",
+                "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq4.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter2-5": {
+                "poster": "",
+                "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq5.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter3-1": {
+                "poster": "",
+                "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq1.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter3-2": {
+                "poster": "",
+                "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq2.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter3-3": {
+                "poster": "",
+                "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq3.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter3-4": {
+                "poster": "",
+                "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq4.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter3-5": {
+                "poster": "",
+                "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq5.webmhd.webm",
+                "mp4": "",
+            },
+            "chapter3-6": {
+                "poster": "",
+                "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq6.webmhd.webm",
+                "mp4": "",
+            },
         },
         altImages = {
             "bob": {
@@ -76,7 +168,7 @@ define([
 
     function app() {
         var mainTemplate = _.template(mainTmpl),
-            mainHTML = mainTemplate({}),
+            mainHTML = mainTemplate({getVideo: getVideo}),
             navTemplate = _.template(navTmpl),
             navHTML = navTemplate({});
             
@@ -147,8 +239,14 @@ define([
             dom.text[$el.closest(".int-main").attr("id")] = $el;
         });
 
-        dom.mobileNav = {};
-        dom.mobileNav['container'] = $(".nav");
+        dom.audio = {};
+        $(".audio-player").each(function(i, el) {
+            var $el = $(el);
+            dom.audio["chapter-" + $el.attr("id").slice(-1)] = $el;
+        });
+
+        dom.navigation = {};
+        dom.navigation['container'] = $(".nav");
 
         rightTop = parseInt($("#css-rc").css("top"));
         stickyTop = parseInt($("#css").css("top"), 10);
@@ -169,19 +267,29 @@ define([
     function initEvents() {
         preLoad();
 
-        if(!mobile) {
-            $(window).scroll(_.throttle(function() {
-                // $(".chapter-intro").toggleClass("chapter-intro-animate");
-                stickDivs();
-                videoControl();
-                // showNav();
-                anchorsAction();
-            }, 15));
-        } 
+        // if(!mobile) {
+        //     $(window).scroll(_.throttle(function() {
+        //         // $(".chapter-intro").toggleClass("chapter-intro-animate");
+        //         stickDivs();
+        //         videoControl();
+        //         // showNav();
+        //         anchorsAction();
+        //     }, 20));
+        // } 
 
-        $(window).scroll(_.throttle(function() {
-            mobileNav();
-        }, 15));
+        $(window).scroll(function() {
+            latestKnownScrollY = window.scrollY;
+            requestTick();
+        });
+
+        $(window).scroll(_.debounce(function() {
+            var currentScrollY = latestKnownScrollY;
+            anchorsAction(currentScrollY);
+        }, 100));
+
+        // $(window).scroll(_.throttle(function() {
+        //     navStuff();
+        // }, 15));
 
         if((mobile || tablet) || $window.width() < 1040) {
             anchorReplace();
@@ -221,9 +329,32 @@ define([
         // initTicker();
     }
 
+    function requestTick() {
+        if(!ticking) {
+            requestAnimationFrame(_.throttle(update, 20));
+        }
+        ticking = true;
+    }
+
+    function update() {
+        // reset the tick so we can
+        // capture the next onScroll
+        ticking = false;
+
+        var currentScrollY = latestKnownScrollY;
+
+        // read offset of DOM elements
+        // and compare to the currentScrollY value
+        // then apply some CSS classes
+        // to the visible items
+
+        stickDivs(currentScrollY);
+        navStuff(currentScrollY);
+        videoControl(currentScrollY);
+    }
+
     function anchorReplace() {
         _.each(dom.anchors, function(val, key) {
-            console.log(key);
             var $el = val;
 
             $el.after("<div class='mobile-alt' style='background-image: url(\"" + getAltImage($el.data('mobile-alt')) + "\");'></img>");
@@ -241,47 +372,55 @@ define([
 
     }
 
-    function stickDivs() {
+    function stickDivs(scrollY) {
         _.each(dom.chapters, function(val, key) {
             var $div = val;
 
-            if($div.offset().top + $div.height() - stickyTop <= $window.scrollTop() + $div.children(".right-container").height()) {
-                $div.children(".right-container").addClass("right-container--bottom");
-            } else {
-                $div.children(".right-container").removeClass("right-container--bottom");
+            if(key !== "intro") {
+                if($div.offset().top + $div.height() - stickyTop <= scrollY + $div.children(".right-container").height()) {
+                    $div.children(".right-container").addClass("right-container--bottom");
+                } else {
+                    $div.children(".right-container").removeClass("right-container--bottom");
+                }
+
+                if($div.offset().top - (stickyTop - rightTop) <= scrollY) {
+                    $div.children(".right-container").addClass("right-container--sticky");
+                } else {
+                    $div.children(".right-container").removeClass("right-container--sticky");
+                }
             }
 
-            if($div.offset().top - (stickyTop - rightTop) <= $window.scrollTop()) {
-                $div.children(".right-container").addClass("right-container--sticky");
+            if($div.offset().top - 500 <= scrollY && ($div.offset().top + $div.height()) - 500 >= scrollY) {
+                $div.children(".right-container").addClass("visible");
             } else {
-                $div.children(".right-container").removeClass("right-container--sticky");
+                $div.children(".right-container").removeClass("visible");
             }
+        
         });
     }
 
-    function videoControl() {
+    function videoControl(scrollY) {
         _.each(dom.videos.breaks, function(val, key) {
             var $el = val;
 
-            if($el.parent().offset().top - $window.height() + 250 <= $window.scrollTop() && $window.scrollTop() + 250 < $el.parent().offset().top + $el.parent().height()) {
+            if($el.parent().offset().top - $window.height() + 250 <= scrollY && $window.scrollTop() + 250 < $el.parent().offset().top + $el.parent().height()) {
                 // $el.parent().css("opacity", "1");
                 $el.get(0).volume = 1;
+
                 setTimeout(function() {
                     $el.get(0).play();
                 }, 300);
             } else {
                 // $el.parent().css("opacity", "0");
                 $el.get(0).volume = 0;
-                setTimeout(function() {
-                    $el.get(0).pause();
-                }, 300);
+                $el.get(0).pause();
             }
 
-            // if($el.parent().offset().top <= $window.scrollTop() + $window.height()) {
-            //     $el.css("position", "fixed");
-            // } else {
-            //     $el.css("position", "relative");
-            // }
+            if($el.parent().offset().top <= $window.scrollTop()) {
+                $el.css("position", "fixed");
+            } else {
+                $el.css("position", "absolute");
+            }
         });
 
         _.each(dom.videos.chapters, function(val, key) {
@@ -318,56 +457,80 @@ define([
     }
 
     function resizeVideos() {
-        if(dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].width() / dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].height() < $body.width() / $body.height()) {
+        // if(dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].width() / dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].height() < $body.width() / $body.height()) {
             $body.removeClass("non-wide");
 
             _.each(dom.videos.breaks, function($el, key) {
                 $el.css("margin-left", 0);
             });
 
-            _.each(dom.videos.chapters, function($el, key) {
-                $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
-            });
+            // videos
+            // _.each(dom.videos.chapters, function($el, key) {
+            //     $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
+            // });
+
+            $("head").append("<style type='text/css'>.right-container video { margin-left: " + (-(dom.videos.chapters['chapter-1'].width() - dom.videos.chapters['chapter-1'].parent(".right-container").width())/2) + "px;}</style>");
 
             dom.videos.intro.css("margin-left", 0);
-        } else {
-            $body.addClass("non-wide");
+        // } else {
+        //     $body.addClass("non-wide");
 
-            _.each(dom.videos.breaks, function($el, key) {
-                $el.css("margin-left", (-($el.width() - $body.width())/2));
-            });
+        //     _.each(dom.videos.breaks, function($el, key) {
+        //         $el.css("margin-left", (-($el.width() - $body.width())/2));
+        //     });
 
-            _.each(dom.videos.chapters, function($el, key) {
-                $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
-            });
+        //     _.each(dom.videos.chapters, function($el, key) {
+        //         $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
+        //     });
 
-            dom.videos.intro.css("margin-left", (-(dom.videos.intro.width() - $body.width())/2));
-        }
+        //     dom.videos.intro.css("margin-left", (-(dom.videos.intro.width() - $body.width())/2));
+        // }
     }
 
-    function mobileNav() {
+    function navStuff(scrollY) {
         var section = "";
         _.each(dom.breaks, function($el, key) {
-            if($el.offset().top <= $window.scrollTop()) {
+            if($el.offset().top <= scrollY) {
                 if(key !== currentChapter) {
                     section = key;
                     currentChapter = key;
                 }
             }
 
-            if(key === "head-1" && ($el.offset().top + $el.height() <= $window.scrollTop())) {
-                dom.mobileNav.container.addClass("nav--show");
-            } else if(key === "head-1") {
-                dom.mobileNav.container.removeClass("nav--show");
+            if(key === "full-intro" && ($el.offset().top + $el.height() <= scrollY)) {
+                dom.navigation.container.addClass("nav--show");
+
+                $("#p-1").addClass("p-visible");
+
+                setTimeout(function() {
+                    $("#p-2").addClass("p-visible");
+                }, 1000);
+
+                setTimeout(function() {
+                    $("#p-3").addClass("p-visible");
+                }, 2000);
+
+                setTimeout(function() {
+                    $("#p-4").addClass("p-visible");
+                }, 3000);
+
+            } else if(key === "full-intro") {
+                dom.navigation.container.removeClass("nav--show");
             }
         });
 
         if(section) {
             $(".nav-chapter--selected").removeClass("nav-chapter--selected");
             $("#nav-chapter-" + section.slice(-1)).addClass("nav-chapter--selected");
+
+            _.each(dom.audio, function($el, key) {
+                $el.get(0).pause();
+            });
+
+            dom.audio["chapter-" + section.slice(-1)].get(0).play();
         }
 
-        dom.mobileNav.container.find(".change").html(section);
+        dom.navigation.container.find(".change").html(section);
     }
 
     function closeIntro() {
@@ -415,17 +578,16 @@ define([
     //     });
     // }
 
-    function anchorsAction() { 
+    function anchorsAction(scrollY) { 
         _.each(dom.chapters, function(el, chapterName) {
             lastAnchors[chapterName] = "";
 
             _.each(dom.anchors[chapterName], function(val, key) {
                 var $el = val;
-                if($el.offset().top - 200 < $window.scrollTop()) {
+                if($el.offset().top - 200 < scrollY) {
                     lastAnchors[chapterName] = $el;
                 }
             });
-
             if(lastAnchors[chapterName] !== "" && currentAnchors[chapterName] !== lastAnchors[chapterName]) {
                 dom.text[chapterName].removeClass("first");
 
@@ -440,6 +602,7 @@ define([
                 currentAnchors[chapterName] = lastAnchors[chapterName];
 
             } else if(lastAnchors[chapterName] === "" && !dom.text[chapterName].hasClass("first")) {
+                delete currentAnchors[chapterName];
                 dom.text[chapterName].addClass("first");
                 changeVideo(dom.text[chapterName]);
             }
@@ -457,6 +620,11 @@ define([
                 }
             }
             key.src = val.high;
+        });
+
+        _.each(videos, function(val, key) {
+            var poster = new Image(1,1);
+            poster.src = val.poster;
         });
 
         if(mobile || tablet) {
@@ -488,57 +656,91 @@ define([
         }, 10);    
     }
 
+    // function changeVideo($anchor) {
+    //     var $chapter = $anchor.closest(".chapter");
+
+    //     $chapter.find(".right-container").append(getVideo($anchor.attr("name"), "waiting"));
+
+    //     var $video = $chapter.find("video.waiting").last();
+
+    //     dom.videos.chapters[$chapter.attr("id")] = $video;
+
+    //     $video.one('play', function() {
+    //         $chapter.find(".waiting").removeClass("waiting").addClass("top-layer");
+    //         $chapter.find(".top-layer").first().animate({volume: 0}, 1000);
+    //         setTimeout(function() {
+    //             $chapter.find(".top-layer").first().remove();
+    //         }, 1000);
+    //     });
+    // }
+
     function changeVideo($anchor) {
         var $chapter = $anchor.closest(".chapter");
-        var mutedTag = (mute) ? "muted" : "";
 
-        $chapter.find(".right-container").append("<video class='waiting' preload='auto' autoplay " + mutedTag + " poster='" + getVideo($anchor.attr("name")).poster + "'></video>");
-        $chapter.find("video.waiting").attr('src', getVideo($anchor.attr("name")).video);
+        $chapter.find(".right-container").prepend(getVideo($anchor.attr("name"), "waiting"));
 
-        var $video = $chapter.find("video.waiting").last();
+        var $video = $chapter.find("video.waiting").first();
+
         dom.videos.chapters[$chapter.attr("id")] = $video;
 
-        setTimeout(function() {
-            $chapter.find(".waiting").removeClass("waiting").addClass("top-layer");
+        $video.parent().css("background-image", "url('" + videos[$anchor.attr("name")].poster + "')");
 
-            setTimeout(function() {
-                $chapter.find(".top-layer").first().remove();
-            }, 300);
-        }, 10);
+        $chapter.find(".waiting").removeClass("waiting").addClass("top-layer");
+        $chapter.find(".top-layer").slice(1).fadeOut(300, function() { $(this).remove(); });
+
     }
 
-    function showNav() {
-        var showNav = false;
+    // function changeVideo($anchor) {
+    //     var $chapter = $anchor.closest(".chapter");
+    //     var mutedTag = (mute) ? "muted" : "";
 
-        _.each(dom.chapters, function(val, key) {
-            var $el = val;
+    //     $chapter.find(".right-container").append("<video class='waiting' preload='auto' autoplay " + mutedTag + " poster='" + getVideo($anchor.attr("name")).poster + "'></video>");
+    //     $chapter.find("video.waiting").attr('src', getVideo($anchor.attr("name")).video);
 
-            if(showNav != true && $window.scrollTop() >= $el.offset().top && $window.scrollTop() <= $el.offset().top + $el.height() - $window.height()) {
-                showNav = $el.attr("id");
-            }
-        });
+    //     var $video = $chapter.find("video.waiting").last();
+    //     dom.videos.chapters[$chapter.attr("id")] = $video;
 
-        if(showNav !== false) {
-            _.each(dom.nav.items, function($el, key) {
-                $el.removeClass("previous").removeClass("selected-chapter");
-                if($el.data("nav") <= parseInt(showNav.slice(-1))) {
-                    $el.addClass("previous");
-                }
-            });
+    //     setTimeout(function() {
+    //         $chapter.find(".waiting").removeClass("waiting").addClass("top-layer");
 
-            dom.nav.items["nav-" + showNav].addClass("selected-chapter");
-            dom.nav.container.removeClass("nav-hidden");
-        } else {
-            dom.nav.container.addClass("nav-hidden");
-            setTimeout(function() {
-                if(dom.nav.container.hasClass("nav-hidden")) {
-                    _.each(dom.nav.items, function($el, key) {
-                        $el.removeClass("previous").removeClass("selected-chapter");
-                    });
-                }
-            }, 300);
-        }
-    }
+    //         setTimeout(function() {
+    //             $chapter.find(".top-layer").first().remove();
+    //         }, 300);
+    //     }, 10);
+    // }
+
+    // function showNav() {
+    //     var showNav = false;
+
+    //     _.each(dom.chapters, function(val, key) {
+    //         var $el = val;
+
+    //         if(showNav != true && $window.scrollTop() >= $el.offset().top && $window.scrollTop() <= $el.offset().top + $el.height() - $window.height()) {
+    //             showNav = $el.attr("id");
+    //         }
+    //     });
+
+    //     if(showNav !== false) {
+    //         _.each(dom.nav.items, function($el, key) {
+    //             $el.removeClass("previous").removeClass("selected-chapter");
+    //             if($el.data("nav") <= parseInt(showNav.slice(-1))) {
+    //                 $el.addClass("previous");
+    //             }
+    //         });
+
+    //         dom.nav.items["nav-" + showNav].addClass("selected-chapter");
+    //         dom.nav.container.removeClass("nav-hidden");
+    //     } else {
+    //         dom.nav.container.addClass("nav-hidden");
+    //         setTimeout(function() {
+    //             if(dom.nav.container.hasClass("nav-hidden")) {
+    //                 _.each(dom.nav.items, function($el, key) {
+    //                     $el.removeClass("previous").removeClass("selected-chapter");
+    //                 });
+    //             }
+    //         }, 300);
+    //     }
+    // }
 
     function getImage(name) {
         var src = images[name].high;
@@ -552,12 +754,14 @@ define([
         return src;
     }
 
-    function getVideo(name) {
-        var src = {};
-        src.video = videos[name].high;
-        src.poster = videos[name].poster;
+    function getVideo(name, className) {
+        var mutedTag = (mute) ? "muted" : "",
+            classTag =  (className) ? " class='" + className + "' " : "",
+            src = {};
+        src.mp4 = (videos[name].mp4) ? "<source src='" + videos[name].mp4 + "' type='video/mp4'>" : "";
+        src.webm = (videos[name].webm) ? "<source src='" + videos[name].webm + "' type='video/webm'>" : "";
 
-        return src;
+        return "<video " + classTag + " preload='none' " + mutedTag + " loop>" + src.mp4 + src.webm + "</video>";
     }
 
     function seconds2time(seconds) {
