@@ -56,6 +56,21 @@ define([
                     "medium": "",
                     "high": "@@assetPath@@/videos/loop.mp4",
             },
+            "adrian": {
+                "poster": "@@assetPath@@/videos/adrianthumb.png",
+                "webm": "",
+                "mp4": "@@assetPath@@/videos/adrian.mp4",
+            },
+            "bruce": {
+                "poster": "@@assetPath@@/videos/brucethumb.png",
+                "webm": "",
+                "mp4": "@@assetPath@@/videos/bruce.mp4",
+            },
+            "tony": {
+                "poster": "@@assetPath@@/videos/tonythumb.png",
+                "webm": "",
+                "mp4": "@@assetPath@@/videos/tony.mp4",
+            },
             "chapter1-1": {
                 "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq1.webmsd.png",
                 "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq1.webmhd.webm",
@@ -92,57 +107,57 @@ define([
                 "mp4": "",
             },
             "chapter2-1": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq1.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq1.webmhd.webm",
                 "mp4": "",
             },
             "chapter2-2": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq2.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq2.webmhd.webm",
                 "mp4": "",
             },
             "chapter2-3": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq3.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq3.webmhd.webm",
                 "mp4": "",
             },
             "chapter2-4": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq4.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq4.webmhd.webm",
                 "mp4": "",
             },
             "chapter2-5": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq5.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq5.webmhd.webm",
                 "mp4": "",
             },
             "chapter3-1": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect13Sq1.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq1.webmhd.webm",
                 "mp4": "",
             },
             "chapter3-2": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq2.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq2.webmhd.webm",
                 "mp4": "",
             },
             "chapter3-3": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq3.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq3.webmhd.webm",
                 "mp4": "",
             },
             "chapter3-4": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq4.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq4.webmhd.webm",
                 "mp4": "",
             },
             "chapter3-5": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq5.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq5.webmhd.webm",
                 "mp4": "",
             },
             "chapter3-6": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq6.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq6.webmhd.webm",
                 "mp4": "",
             },
@@ -168,7 +183,7 @@ define([
 
     function app() {
         var mainTemplate = _.template(mainTmpl),
-            mainHTML = mainTemplate({getVideo: getVideo}),
+            mainHTML = mainTemplate({getVideo: getVideo, videos: videos}),
             navTemplate = _.template(navTmpl),
             navHTML = navTemplate({});
             
@@ -277,19 +292,16 @@ define([
         //     }, 20));
         // } 
 
-        $(window).scroll(function() {
-            latestKnownScrollY = window.scrollY;
-            requestTick();
-        });
+        $(window).scroll(_.debounce(update, 500));
 
-        $(window).scroll(_.debounce(function() {
-            var currentScrollY = latestKnownScrollY;
-            anchorsAction(currentScrollY);
-        }, 100));
+        // $(window).scroll(_.debounce(function() {
+        //     var currentScrollY = latestKnownScrollY;
+        //     anchorsAction(currentScrollY);
+        // }, 100));
 
-        // $(window).scroll(_.throttle(function() {
-        //     navStuff();
-        // }, 15));
+        $(window).scroll(_.throttle(function() {
+            stickDivs(window.scrollY)
+        }, 30));
 
         if((mobile || tablet) || $window.width() < 1040) {
             anchorReplace();
@@ -331,26 +343,18 @@ define([
 
     function requestTick() {
         if(!ticking) {
-            requestAnimationFrame(_.throttle(update, 20));
+            requestAnimationFrame(update, 300);
         }
         ticking = true;
     }
 
     function update() {
-        // reset the tick so we can
-        // capture the next onScroll
+        var currentScrollY = window.scrollY;
         ticking = false;
 
-        var currentScrollY = latestKnownScrollY;
-
-        // read offset of DOM elements
-        // and compare to the currentScrollY value
-        // then apply some CSS classes
-        // to the visible items
-
-        stickDivs(currentScrollY);
         navStuff(currentScrollY);
         videoControl(currentScrollY);
+        anchorsAction(currentScrollY);
     }
 
     function anchorReplace() {
@@ -397,41 +401,45 @@ define([
             }
         
         });
+        
+        // _.each(dom.videos.breaks, function($el, key) {
+        //     if($el.parent().offset().top <= $window.scrollTop()) {
+        //         $el.css("position", "fixed");
+        //     } else {
+        //         $el.css("position", "absolute");
+        //     }
+        // });
     }
 
     function videoControl(scrollY) {
         _.each(dom.videos.breaks, function(val, key) {
-            var $el = val;
+            var $el = val,
+                $elParent = $el.parent();
 
-            if($el.parent().offset().top - $window.height() + 250 <= scrollY && $window.scrollTop() + 250 < $el.parent().offset().top + $el.parent().height()) {
+            if($elParent.offset().top - $window.height() + 250 <= scrollY && $window.scrollTop() + 250 < $elParent.offset().top + $elParent.height()) {
                 // $el.parent().css("opacity", "1");
                 $el.get(0).volume = 1;
-
-                setTimeout(function() {
-                    $el.get(0).play();
-                }, 300);
+                $el.get(0).play();
+                $el.css("display", "block");
             } else {
                 // $el.parent().css("opacity", "0");
-                $el.get(0).volume = 0;
                 $el.get(0).pause();
-            }
-
-            if($el.parent().offset().top <= $window.scrollTop()) {
-                $el.css("position", "fixed");
-            } else {
-                $el.css("position", "absolute");
+                $el.css("display", "none");
             }
         });
 
         _.each(dom.videos.chapters, function(val, key) {
-            var $el = val;
+            var $el = val,
+                $elParent = $el.parent();
 
-            if($el.parent().hasClass("right-container--sticky") && !$el.parent().hasClass("right-container--bottom")) {
+            if($elParent.hasClass("right-container--sticky") && !$elParent.hasClass("right-container--bottom")) {
                 $el.get(0).play();
+                $el.css("display", "block");
             } else {
                 $el.get(0).pause();
+                $el.css("display", "none");
             }
-        }, {});
+        });
     }
 
     function muteVideo() {
@@ -442,16 +450,17 @@ define([
         _.each(dom.videos.chapters, function($el, key) {
             $el.get(0).muted = mute;
         });
+        _.each(dom.audio, function($el, key) {
+            $el.get(0).muted = mute;
+        });
 
         if(dom.videos.intro.get(0)) {
             dom.videos.intro.get(0).muted = mute;
         }
 
         if(mute === true) {
-            $(".js-mute-text").html("Unmute");
             $(".mute").addClass("muted");
         } else {
-            $(".js-mute-text").html("Mute");
             $(".mute").removeClass("muted");
         }
     }
@@ -685,10 +694,11 @@ define([
 
         $video.parent().css("background-image", "url('" + videos[$anchor.attr("name")].poster + "')");
 
-        $chapter.find(".waiting").removeClass("waiting").addClass("top-layer");
-        $chapter.find(".top-layer").slice(1).fadeOut(300, function() { $(this).remove(); });
-
-    }
+        setTimeout(function() {
+            $chapter.find(".waiting").removeClass("waiting").addClass("top-layer");
+            $chapter.find(".top-layer").slice(1).fadeOut(300, function() { $(this).remove(); });
+        }, 100);
+}
 
     // function changeVideo($anchor) {
     //     var $chapter = $anchor.closest(".chapter");
@@ -757,11 +767,12 @@ define([
     function getVideo(name, className) {
         var mutedTag = (mute) ? "muted" : "",
             classTag =  (className) ? " class='" + className + "' " : "",
+            posterTag = (videos[name].poster !== "") ? "poster='" + videos[name].poster + "'" : "",
             src = {};
         src.mp4 = (videos[name].mp4) ? "<source src='" + videos[name].mp4 + "' type='video/mp4'>" : "";
         src.webm = (videos[name].webm) ? "<source src='" + videos[name].webm + "' type='video/webm'>" : "";
 
-        return "<video " + classTag + " preload='none' " + mutedTag + " loop>" + src.mp4 + src.webm + "</video>";
+        return "<video " + classTag + " preload='none' " + mutedTag + posterTag + " loop autoplay>" + src.mp4 + src.webm + "</video>";
     }
 
     function seconds2time(seconds) {
