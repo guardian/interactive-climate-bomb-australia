@@ -15,6 +15,7 @@ define([
 
     var rightTop,
         stickyTop,
+        data,
         $window = $(window),
         $body,
         anchorsFired = new Array(),
@@ -44,17 +45,31 @@ define([
                 }
             },
         videos = {
-            "video": {
-                    "poster": "@@assetPath@@/videos/posters/poster.png",
-                    "low": "",
-                    "medium": "",
-                    "high": "@@assetPath@@/videos/test6.mp4",
+            "intro": {
+                "poster": "@@assetPath@@/videos/intro.png",
+                "webm": "",
+                "mp4": "@@assetPath@@/videos/intro.mp4",
             },
             "loop": {
                     "poster": "@@assetPath@@/videos/posters/poster.png",
                     "low": "",
                     "medium": "",
                     "high": "@@assetPath@@/videos/loop.mp4",
+            },
+            "adrian": {
+                "poster": "@@assetPath@@/videos/adrianthumb.png",
+                "webm": "",
+                "mp4": "@@assetPath@@/videos/adrian.mp4",
+            },
+            "bruce": {
+                "poster": "@@assetPath@@/videos/brucethumb.png",
+                "webm": "",
+                "mp4": "@@assetPath@@/videos/bruce.mp4",
+            },
+            "tony": {
+                "poster": "@@assetPath@@/videos/tonythumb.png",
+                "webm": "",
+                "mp4": "@@assetPath@@/videos/tony.mp4",
             },
             "chapter1-1": {
                 "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq1.webmsd.png",
@@ -92,57 +107,57 @@ define([
                 "mp4": "",
             },
             "chapter2-1": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq1.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq1.webmhd.webm",
                 "mp4": "",
             },
             "chapter2-2": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq2.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq2.webmhd.webm",
                 "mp4": "",
             },
             "chapter2-3": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq3.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq3.webmhd.webm",
                 "mp4": "",
             },
             "chapter2-4": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq4.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq4.webmhd.webm",
                 "mp4": "",
             },
             "chapter2-5": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq5.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq5.webmhd.webm",
                 "mp4": "",
             },
             "chapter3-1": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq1.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq1.webmhd.webm",
                 "mp4": "",
             },
             "chapter3-2": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq2.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq2.webmhd.webm",
                 "mp4": "",
             },
             "chapter3-3": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq3.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq3.webmhd.webm",
                 "mp4": "",
             },
             "chapter3-4": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq4.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq4.webmhd.webm",
                 "mp4": "",
             },
             "chapter3-5": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq5.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq5.webmhd.webm",
                 "mp4": "",
             },
             "chapter3-6": {
-                "poster": "",
+                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq6.webmhd.webmhd.png",
                 "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq6.webmhd.webm",
                 "mp4": "",
             },
@@ -163,12 +178,21 @@ define([
 
     function init(el, context, config, mediator) {
         whatBrowser();
-        app();
+        $.ajax({
+            url: "http://interactive.guim.co.uk/spreadsheetdata/0AjKEhS-Bj-4DdHBhTW5Sc3lMdmZJX1JJZS11OU1HQ1E.json",
+            cache: false
+        })
+        .done(function(data) {
+            data = typeof data === 'string' ? JSON.parse(data) : data;
+            whatBrowser();
+            app(data);
+        });
     }
 
-    function app() {
+    function app(data) {
+        console.log(data);
         var mainTemplate = _.template(mainTmpl),
-            mainHTML = mainTemplate({getVideo: getVideo}),
+            mainHTML = mainTemplate({data: data.sheets, getVideo: getVideo, videos: videos, getVideoNew: getVideoNew}),
             navTemplate = _.template(navTmpl),
             navHTML = navTemplate({});
             
@@ -196,9 +220,11 @@ define([
             dom.videos.chapters[$el.closest(".chapter").attr("id")] = $el;
         });
 
-        $(".full video").each(function(i, el) {
-            var $el = $(el);
-            dom.videos.breaks[$el.parent(".full").attr("id")] = $el;
+        $(".full").each(function(i, el) {
+            var $el = $(el).find("video");
+            if($el.length > 0) {
+                dom.videos.breaks[$el.closest(".full").attr("id")] = $el;
+            }
         });
 
         dom.videos.intro = $(".intro video");
@@ -277,19 +303,20 @@ define([
         //     }, 20));
         // } 
 
-        $(window).scroll(function() {
-            latestKnownScrollY = window.scrollY;
-            requestTick();
-        });
+        $(window).scroll(_.debounce(update, 500));
 
-        $(window).scroll(_.debounce(function() {
-            var currentScrollY = latestKnownScrollY;
-            anchorsAction(currentScrollY);
-        }, 100));
+        setTimeout(function() {
+            $(".title-box").addClass("visible");
+        }, 15000);
 
-        // $(window).scroll(_.throttle(function() {
-        //     navStuff();
-        // }, 15));
+        // $(window).scroll(_.debounce(function() {
+        //     var currentScrollY = latestKnownScrollY;
+        //     anchorsAction(currentScrollY);
+        // }, 100));
+
+        $(window).scroll(_.throttle(function() {
+            stickDivs(window.scrollY)
+        }, 10));
 
         if((mobile || tablet) || $window.width() < 1040) {
             anchorReplace();
@@ -331,26 +358,18 @@ define([
 
     function requestTick() {
         if(!ticking) {
-            requestAnimationFrame(_.throttle(update, 20));
+            requestAnimationFrame(update, 300);
         }
         ticking = true;
     }
 
     function update() {
-        // reset the tick so we can
-        // capture the next onScroll
+        var currentScrollY = window.scrollY;
         ticking = false;
 
-        var currentScrollY = latestKnownScrollY;
-
-        // read offset of DOM elements
-        // and compare to the currentScrollY value
-        // then apply some CSS classes
-        // to the visible items
-
-        stickDivs(currentScrollY);
         navStuff(currentScrollY);
         videoControl(currentScrollY);
+        anchorsAction(currentScrollY);
     }
 
     function anchorReplace() {
@@ -397,41 +416,47 @@ define([
             }
         
         });
+
+        _.each(dom.videos.breaks, function($el, key) {
+            if($el.closest(".full").offset().top <= $window.scrollTop()) {
+                $el.parent(".video-wrapper").css("position", "fixed");
+            } else {
+                $el.parent(".video-wrapper").css("position", "absolute");
+            }
+        });
     }
 
     function videoControl(scrollY) {
         _.each(dom.videos.breaks, function(val, key) {
-            var $el = val;
+            var $el = val,
+                $elParent = $el.closest(".full");
 
-            if($el.parent().offset().top - $window.height() + 250 <= scrollY && $window.scrollTop() + 250 < $el.parent().offset().top + $el.parent().height()) {
+            if($elParent.offset().top - $window.height() + 250 <= scrollY && $window.scrollTop() + 250 < $elParent.offset().top + $elParent.height()) {
                 // $el.parent().css("opacity", "1");
                 $el.get(0).volume = 1;
-
-                setTimeout(function() {
-                    $el.get(0).play();
-                }, 300);
+                $el.get(0).play();
+                $el.css("display", "block");
             } else {
                 // $el.parent().css("opacity", "0");
-                $el.get(0).volume = 0;
                 $el.get(0).pause();
-            }
-
-            if($el.parent().offset().top <= $window.scrollTop()) {
-                $el.css("position", "fixed");
-            } else {
-                $el.css("position", "absolute");
+                $el.css("display", "none");
             }
         });
 
         _.each(dom.videos.chapters, function(val, key) {
-            var $el = val;
+            var $el = val,
+                $elParent = $el.closest(".right-container");
 
-            if($el.parent().hasClass("right-container--sticky") && !$el.parent().hasClass("right-container--bottom")) {
+            if($elParent.hasClass("right-container--sticky") && !$elParent.hasClass("right-container--bottom")) {
                 $el.get(0).play();
+                $el.css("display", "block");
+                // console.log(key);
             } else {
                 $el.get(0).pause();
+                $el.css("display", "none");
             }
-        }, {});
+        });
+        console.log(dom);
     }
 
     function muteVideo() {
@@ -442,16 +467,17 @@ define([
         _.each(dom.videos.chapters, function($el, key) {
             $el.get(0).muted = mute;
         });
+        _.each(dom.audio, function($el, key) {
+            $el.get(0).muted = mute;
+        });
 
         if(dom.videos.intro.get(0)) {
             dom.videos.intro.get(0).muted = mute;
         }
 
         if(mute === true) {
-            $(".js-mute-text").html("Unmute");
             $(".mute").addClass("muted");
         } else {
-            $(".js-mute-text").html("Mute");
             $(".mute").removeClass("muted");
         }
     }
@@ -469,7 +495,7 @@ define([
             //     $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
             // });
 
-            $("head").append("<style type='text/css'>.right-container video { margin-left: " + (-(dom.videos.chapters['chapter-1'].width() - dom.videos.chapters['chapter-1'].parent(".right-container").width())/2) + "px;}</style>");
+            $("head").append("<style type='text/css'>.right-container video { margin-left: " + (-(dom.videos.chapters['chapter-1'].closest(".right-container").height()*(16/9) - dom.videos.chapters['chapter-1'].closest(".right-container").width())/2) + "px;}</style>");
 
             dom.videos.intro.css("margin-left", 0);
         // } else {
@@ -498,7 +524,7 @@ define([
             }
 
             if(key === "full-intro" && ($el.offset().top + $el.height() <= scrollY)) {
-                dom.navigation.container.addClass("nav--show");
+                // dom.navigation.container.addClass("nav--show");
 
                 $("#p-1").addClass("p-visible");
 
@@ -515,7 +541,22 @@ define([
                 }, 3000);
 
             } else if(key === "full-intro") {
-                dom.navigation.container.removeClass("nav--show");
+                // dom.navigation.container.removeClass("nav--show");
+            }
+
+            if(key === "full-series" && ($el.offset().top + $el.height() <= scrollY)) {
+                // dom.navigation.container.addClass("nav--show");
+
+                $("#series-1").addClass("highlight");
+
+                setTimeout(function() {
+                    $("#series-2").addClass("highlight");
+                }, 1000);
+
+                setTimeout(function() {
+                    $("#series-3").addClass("highlight");
+                }, 2000);
+
             }
         });
 
@@ -527,7 +568,7 @@ define([
                 $el.get(0).pause();
             });
 
-            dom.audio["chapter-" + section.slice(-1)].get(0).play();
+            // dom.audio["chapter-" + section.slice(-1)].get(0).play();
         }
 
         dom.navigation.container.find(".change").html(section);
@@ -588,6 +629,7 @@ define([
                     lastAnchors[chapterName] = $el;
                 }
             });
+
             if(lastAnchors[chapterName] !== "" && currentAnchors[chapterName] !== lastAnchors[chapterName]) {
                 dom.text[chapterName].removeClass("first");
 
@@ -601,7 +643,7 @@ define([
 
                 currentAnchors[chapterName] = lastAnchors[chapterName];
 
-            } else if(lastAnchors[chapterName] === "" && !dom.text[chapterName].hasClass("first")) {
+            } else if(lastAnchors[chapterName] === "" && dom.text[chapterName] && !dom.text[chapterName].hasClass("first")) {
                 delete currentAnchors[chapterName];
                 dom.text[chapterName].addClass("first");
                 changeVideo(dom.text[chapterName]);
@@ -653,7 +695,7 @@ define([
            setTimeout(function() {
                 $chapter.find(".top-layer").first().remove();
             }, 300);
-        }, 10);    
+        }, 10);
     }
 
     // function changeVideo($anchor) {
@@ -677,17 +719,24 @@ define([
     function changeVideo($anchor) {
         var $chapter = $anchor.closest(".chapter");
 
-        $chapter.find(".right-container").prepend(getVideo($anchor.attr("name"), "waiting"));
+        $chapter.find(".right-container").prepend(getVideoNew($anchor.attr("name"), "waiting", true));
 
-        var $video = $chapter.find("video.waiting").first();
+        var $videoWrapper = $chapter.find(".waiting").first();
 
-        dom.videos.chapters[$chapter.attr("id")] = $video;
+        dom.videos.chapters[$chapter.attr("id")] = $videoWrapper.find("video");
 
-        $video.parent().css("background-image", "url('" + videos[$anchor.attr("name")].poster + "')");
+        // $video.parent().css("background-image", "url('" + videos[$anchor.attr("name")].poster + "')");
 
-        $chapter.find(".waiting").removeClass("waiting").addClass("top-layer");
-        $chapter.find(".top-layer").slice(1).fadeOut(300, function() { $(this).remove(); });
+        setTimeout(function() {
+            $chapter.find(".waiting").removeClass("waiting").addClass("top-layer");
 
+            var $save = $chapter.find(".top-layer").slice(1);
+            $save.addClass("fade-out");
+            
+            setTimeout(function() {
+                $save.remove();
+            }, 300);
+        }, 100);
     }
 
     // function changeVideo($anchor) {
@@ -754,14 +803,28 @@ define([
         return src;
     }
 
-    function getVideo(name, className) {
+    function getVideo(name, className, autoplay) {
         var mutedTag = (mute) ? "muted" : "",
-            classTag =  (className) ? " class='" + className + "' " : "",
+            classTag =  (className) ? className : "",
+            posterTag = (videos[name].poster !== "") ? "poster='" + videos[name].poster + "'" : "",
+            autoplayTag = (autoplay) ? "autoplay" : "",
             src = {};
         src.mp4 = (videos[name].mp4) ? "<source src='" + videos[name].mp4 + "' type='video/mp4'>" : "";
         src.webm = (videos[name].webm) ? "<source src='" + videos[name].webm + "' type='video/webm'>" : "";
 
-        return "<video " + classTag + " preload='none' " + mutedTag + " loop>" + src.mp4 + src.webm + "</video>";
+        return "<div class='video-wrapper " + classTag + "' style='background-image: url(\"" + videos[name].poster + "\");'><video preload='none' " + mutedTag + posterTag + " loop " + autoplayTag + ">" + src.mp4 + src.webm + "</video></div>";
+    }
+
+    function getVideoNew(name, className, autoplay) {
+        var mutedTag = (mute) ? "muted" : "",
+            classTag =  (className) ? className : "",
+            posterTag = "poster='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1'",
+            autoplayTag = (autoplay) ? "autoplay" : "",
+            src = {};
+        src.mp4 = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048' type='video/mp4'>";
+        src.webm = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/webm&maxbitrate=2048' type='video/webm'>";
+
+        return "<div class='video-wrapper " + classTag + "' style='background-image: url(\"http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1\");'><video preload='none' " + mutedTag + posterTag + " loop " + autoplayTag + ">" + src.mp4 + src.webm + "</video></div>";
     }
 
     function seconds2time(seconds) {
