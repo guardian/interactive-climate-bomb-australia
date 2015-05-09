@@ -170,7 +170,8 @@ body {
 	a {
 		height: 1px;
 		border: 0;
-		border-bottom: solid 1px red;
+		display: block;
+		width: 100%;
 	}
 
 	#intro & {
@@ -283,35 +284,44 @@ body {
 	transition: opacity 0.3s ease-in-out;
 	background-size: cover;
 	background-position: center center;
-	opacity: 0;
+	opacity: 1;
 	transform: translateZ(0);
+	will-change: opacity, position;
 
 	@include mq(desktop) {
 		display: block;
 		max-height: calc((980px - 60px) * (6 / 10));
   		max-width: calc((980px - 60px) * (6 / 10));
-		margin-left: calc(((980px - 60px) * (4 / 10)) + 60px);
+		right: 0;
 		top: 80px;
 	}
 
 	@include mq(leftCol) {
 		max-height: calc((1140px - 80px) * 0.65);
   		max-width: calc((1140px - 80px) * 0.65);
-		margin-left: calc(((1140px - 80px) * 0.35) + 80px);
+		right: 0;
 	}
 
 	@include mq(wide) {
 		max-height: calc((1300px - 80px) * 0.65);
   		max-width: calc((1300px - 80px) * 0.65);
-		margin-left: calc(((1300px - 80px) * 0.35) + 80px);
+		right: 0;
 	}
 
 	&.right-container--sticky {
 		position: fixed;
-		top: 100px;
-
+		
 		@include mq(desktop) {
+			right: calc((100% - 980px)/2);
 			top: 0px;
+		}
+
+		@include mq(leftCol) {
+			right: calc((100% - 1140px)/2);
+		}
+
+		@include mq(wide) {
+			right: calc((100% - 1300px)/2);
 		}
 	}
 
@@ -371,8 +381,7 @@ body {
 	background-size: 100% 100%;
 	background-position: center center;
 	background-repeat: no-repeat;
-
-	transition: opacity 0.6s ease-in-out;
+	backface-visibility: hidden;
 
 	.int-main {
 		height: 100%;
@@ -464,13 +473,17 @@ body {
 	width: 100%;
 	height: 100%;
 	display: block;
-	background-position: center center;
 	background-size: cover;
 	background-repeat: no-repeat;
-	transition: opacity 0.3s ease-in-out;
+	transition: opacity 0.3s;
+	will-change: opacity;
 
 	.full & {
 		border-top: 4px solid #ff9b0b;
+	}
+
+	.right-container & {
+		background-position: center center;
 	}
 }
 
