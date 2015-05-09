@@ -11,11 +11,12 @@
 
 		</div>
 </div> -->
-<!-- <div class="audio-container">
-	<audio src="@@assetPath@@/videos/adrian.mp3" preload="auto" loop class="audio-player" id="audio-chapter-1"></audio>
-	<audio src="@@assetPath@@/videos/bruce.mp3" preload="auto" loop class="audio-player" id="audio-chapter-2"></audio>
-	<audio src="@@assetPath@@/videos/tony.mp3" preload="auto" loop class="audio-player" id="audio-chapter-3"></audio>
-</div> -->
+<div class="audio-container">
+	<audio src="@@assetPath@@/videos/1.mp3" preload="auto" loop class="audio-player" id="audio-full-intro" autoplay></audio>
+	<audio src="@@assetPath@@/videos/2.mp3" preload="auto" loop class="audio-player" id="audio-head-1"></audio>
+	<audio src="@@assetPath@@/videos/3.mp3" preload="auto" loop class="audio-player" id="audio-head-2"></audio>
+	<audio src="@@assetPath@@/videos/4.mp3" preload="auto" loop class="audio-player" id="audio-head-3"></audio>
+</div>
 <div class="story-wrapper">
 	<!-- <div class="full top" id="full-series">
 		<div class="int-main">
@@ -46,9 +47,9 @@
 			<!-- <div class="chapter-box">
 				<%= data.intro[0].location %>
 			</div> -->
-			<div class="scroll-box">
+			<!-- <div class="scroll-box">
 				<svg width="24" height="18" viewBox="0 0 24 18"><path d="M.4 15.3l10.5-8.4L12 6l1.1.9 10.5 8.4-.5.7L12 9.7.9 16l-.5-.7z" fill="#333333"></path></svg>
-			</div>
+			</div> -->
 		</div>
 	</div>
 	<div class="int-container">
@@ -69,99 +70,40 @@
 			</div>
 		</div>
 	</div>
-	<div class="full" id="head-1" data-nav-name="The Second" data-mobile-alt="bob">
-		<%= getVideoNew("150508Aus1_2_h264_mezzanine", "top-layer", false) %>
-		<div class="int-main">
-			<div class="chapter-intro">
-				<h1>Our land</h1>
-			</div>
-		</div>
-	</div>
-	<div class="int-container">
-		<div class="int-main chapter" id="chapter-1">
-			<div class="right-container">
-				<%= getVideoNew("150508Aus1_3_h264_mezzanine", "top-layer", false) %>
-			</div>
-			<div class="text">
-				<div class="text--content first" name="150508Aus1_3_h264_mezzanine" data-type="video">
-					<% data.chapter1.map(function(row) { %>
-						<% if(row.anchor !== "") { %><a name="<%= row.anchor %>" data-type="video"></a><% } %>
-
-						<% if(row.type === "paragraph") { %>
-							<p><%= row.content %></p>
-						<% } %>
-						<% if(row.type === "pullquote") { %>
-							<p class="pullquote">
-								<%= row.content %> 
-							</p>
-							<% if(row.meta !== "") { %><p class="pullquote-credit">― <%= row.meta %></p><% } %>
-						<% } %>
-						<% if(row.type === "image") { %>
-							<img src="<%= row.content %>" class="<%= row.meta %>">
-						<% } %>
-					<% }); %>
+	
+	<% for (i = 1; i < 4; i++) { %>
+		<div class="full" id="head-<%= i %>" data-mobile-alt="bob">
+			<%= getVideoNew(data['break' + i][0].video, "top-layer", false, true) %>
+			<div class="int-main">
+				<div class="chapter-intro">
+					<h1><%= data['break' + i][0].title %></h1>
 				</div>
 			</div>
 		</div>
-	</div>
-	<div class="full" id="head-2" data-nav-name="The Second" data-mobile-alt="bob">
-		<%= getVideoNew("150508Aus2_1_h264_mezzanine", "top-layer", false) %>
-		<div class="int-main">
-			<div class="chapter-intro">
-				<h1>Water is precious</h1>
-			</div>
-		</div>
-	</div>
-	<div class="int-container">
-		<div class="int-main chapter" id="chapter-2">
-			<div class="right-container">
-				<%= getVideoNew("150508Aus2_2_h264_mezzanine", "top-layer", false) %>
-			</div>
-			<div class="text">
-				<div class="text--content first" name="150508Aus2_2_h264_mezzanine" data-type="video">
-					<% data.chapter2.map(function(row) { %>
-						<% if(row.anchor !== "") { %><a name="<%= row.anchor %>" data-type="video"></a><% } %>
+		<div class="int-container">
+			<div class="int-main chapter" id="chapter-<%= i %>">
+				<div class="right-container">
+					<%= getVideoNew(data['chapter' + i][0].anchor, "top-layer", false, true) %>
+				</div>
+				<div class="text">
+					<div class="text--content first" name="<%= data['chapter' + i][0].anchor %>" data-type="video">
+						<% data['chapter' + i].map(function(row) { %>
+							<% if(row.anchor !== "" && row.rowNumber !== 1) { %><a name="<%= row.anchor %>" data-type="video"></a><% } %>
 
-						<% if(row.type === "paragraph") { %>
-							<p><%= row.content %></p>
-						<% } %>
-						<% if(row.type === "image") { %>
-							<img src="<%= row.content %>" class="<%= row.meta %>">
-						<% } %>
-					<% }); %>
+							<% if(row.type === "paragraph") { %>
+								<p><%= row.content %></p>
+							<% } %>
+
+							<% if(row.type === "image") { %>
+								<img src="<%= row.content %>" class="<%= row.meta %>">
+							<% } %>
+						<% }); %>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-	<div class="full" id="head-3" data-nav-name="The Third" data-mobile-alt="bob">
-		<%= getVideoNew("150508Aus3_1_1_h264_mezzanine", "top-layer", false) %>
-		<div class="int-main">
-			<div class="chapter-intro">
-				<h1>Sacrificing the Reef</h1>
-			</div>
-		</div>
-	</div>
-	<div class="int-container">
-		<div class="int-main chapter" id="chapter-3">
-			<div class="right-container">
-				<%= getVideoNew("150508Aus3_2_h264_mezzanine", "top-layer", false) %>
-			</div>
-			<div class="text">
-				<div class="text--content first" name="150508Aus3_2_h264_mezzanine" data-type="video">
-					<% data.chapter3.map(function(row) { %>
-						<% if(row.anchor !== "") { %><a name="<%= row.anchor %>" data-type="video"></a><% } %>
+	<% } %>
 
-						<% if(row.type === "paragraph") { %>
-							<p><%= row.content %></p>
-						<% } %>
-						<% if(row.type === "image") { %>
-							<img src="<%= row.content %>" class="<%= row.meta %>">
-						<% } %>
-					<% }); %>
-				</div>
-			</div>
-		</div>
-	</div>
 	<div class="full" id="head-4" data-nav-name="The Fourth" data-mobile-alt="bob">
 		<video src="@@assetPath@@/videos/outro.mp4" loop preload="none" class="top-layer">
 		</video>

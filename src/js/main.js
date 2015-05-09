@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'underscore',
+    'lodash',
     'bowser',
     'text!templates/mainTemplate.html',
     'text!templates/navTemplate.html'
@@ -15,7 +15,7 @@ define([
 
     var rightTop,
         stickyTop,
-        data,
+        sheets,
         $window = $(window),
         $body,
         anchorsFired = new Array(),
@@ -25,8 +25,13 @@ define([
         mobile = false,
         tablet = false,
         mute = false,
+        currentAudio = "full-intro",
         ticking = false,
         latestKnownScrollY = 0,
+        volumes = {
+            "videos": 0.5,
+            "audio": 1.0,
+        },
         images = {
             "bob": {
                     "low": "",
@@ -55,111 +60,6 @@ define([
                     "low": "",
                     "medium": "",
                     "high": "@@assetPath@@/videos/loop.mp4",
-            },
-            "adrian": {
-                "poster": "@@assetPath@@/videos/adrianthumb.png",
-                "webm": "",
-                "mp4": "@@assetPath@@/videos/adrian.mp4",
-            },
-            "bruce": {
-                "poster": "@@assetPath@@/videos/brucethumb.png",
-                "webm": "",
-                "mp4": "@@assetPath@@/videos/bruce.mp4",
-            },
-            "tony": {
-                "poster": "@@assetPath@@/videos/tonythumb.png",
-                "webm": "",
-                "mp4": "@@assetPath@@/videos/tony.mp4",
-            },
-            "chapter1-1": {
-                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq1.webmsd.png",
-                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq1.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter1-2": {
-                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq2.webmsd.png",
-                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq2.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter1-3": {
-                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq3.webmsd.png",
-                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq3.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter1-4": {
-                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq4.webmsd.png",
-                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq4.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter1-5": {
-                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq5.webmsd.png",
-                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq5.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter1-6": {
-                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq6.webmsd.png",
-                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq6.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter1-7": {
-                "poster": "@@assetPath@@/videos/chapter-1/thumbnails/Sect1Sq7.webmsd.png",
-                "webm": "@@assetPath@@/videos/chapter-1/Sect1Sq7.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter2-1": {
-                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq1.webmhd.webmhd.png",
-                "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq1.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter2-2": {
-                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq2.webmhd.webmhd.png",
-                "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq2.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter2-3": {
-                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq3.webmhd.webmhd.png",
-                "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq3.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter2-4": {
-                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq4.webmhd.webmhd.png",
-                "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq4.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter2-5": {
-                "poster": "@@assetPath@@/videos/chapter-2/thumbnails/Sect2Sq5.webmhd.webmhd.png",
-                "webm": "@@assetPath@@/videos/chapter-2/Sect2Sq5.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter3-1": {
-                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq1.webmhd.webmhd.png",
-                "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq1.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter3-2": {
-                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq2.webmhd.webmhd.png",
-                "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq2.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter3-3": {
-                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq3.webmhd.webmhd.png",
-                "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq3.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter3-4": {
-                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq4.webmhd.webmhd.png",
-                "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq4.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter3-5": {
-                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq5.webmhd.webmhd.png",
-                "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq5.webmhd.webm",
-                "mp4": "",
-            },
-            "chapter3-6": {
-                "poster": "@@assetPath@@/videos/chapter-3/thumbnails/Sect3Sq6.webmhd.webmhd.png",
-                "webm": "@@assetPath@@/videos/chapter-3/Sect3Sq6.webmhd.webm",
-                "mp4": "",
             },
         },
         altImages = {
@@ -190,7 +90,7 @@ define([
     }
 
     function app(data) {
-        console.log(data);
+        sheets = data.sheets;
         var mainTemplate = _.template(mainTmpl),
             mainHTML = mainTemplate({data: data.sheets, getVideo: getVideo, videos: videos, getVideoNew: getVideoNew}),
             navTemplate = _.template(navTmpl),
@@ -222,12 +122,12 @@ define([
 
         $(".full").each(function(i, el) {
             var $el = $(el).find("video");
-            if($el.length > 0) {
+            if($el.length > 0 && !$el.closest(".full").hasClass("top")) {
                 dom.videos.breaks[$el.closest(".full").attr("id")] = $el;
             }
         });
 
-        dom.videos.intro = $(".intro video");
+        dom.videos.intro = $("#full-intro video");
 
         dom.anchors = {"chapter-1": {}, "chapter-2": {}, "chapter-3": {}};
 
@@ -268,7 +168,7 @@ define([
         dom.audio = {};
         $(".audio-player").each(function(i, el) {
             var $el = $(el);
-            dom.audio["chapter-" + $el.attr("id").slice(-1)] = $el;
+            dom.audio[$el.attr("id").slice(6)] = $el;
         });
 
         dom.navigation = {};
@@ -305,9 +205,15 @@ define([
 
         $(window).scroll(_.debounce(update, 500));
 
-        setTimeout(function() {
-            $(".title-box").addClass("visible");
-        }, 15000);
+        dom.videos.intro.get(0).oncanplay = function() {
+            setTimeout(function() {
+                $(".title-box").addClass("visible");
+            }, 15000);
+        }
+
+        resizeVideos();
+
+        setAudioLevels();
 
         // $(window).scroll(_.debounce(function() {
         //     var currentScrollY = latestKnownScrollY;
@@ -315,8 +221,8 @@ define([
         // }, 100));
 
         $(window).scroll(_.throttle(function() {
-            stickDivs(window.scrollY)
-        }, 10));
+            stickDivs(window.scrollY);
+        }, 30));
 
         if((mobile || tablet) || $window.width() < 1040) {
             anchorReplace();
@@ -326,9 +232,9 @@ define([
             breaksReplace();
         }
 
-        dom.videos.chapters['chapter-1'].get(0).addEventListener('loadeddata', function() {
-            resizeVideos();
-        }, false);
+        // dom.videos.chapters['chapter-1'].get(0).addEventListener('loadeddata', function() {
+        //     resizeVideos();
+        // }, false);
 
         $(window).resize(_.throttle(function() {
                 resizeVideos();
@@ -356,20 +262,13 @@ define([
         // initTicker();
     }
 
-    function requestTick() {
-        if(!ticking) {
-            requestAnimationFrame(update, 300);
-        }
-        ticking = true;
-    }
-
     function update() {
         var currentScrollY = window.scrollY;
-        ticking = false;
 
         navStuff(currentScrollY);
         videoControl(currentScrollY);
         anchorsAction(currentScrollY);
+        // stickDivs(currentScrollY);
     }
 
     function anchorReplace() {
@@ -391,28 +290,45 @@ define([
 
     }
 
+    function setAudioLevels() {
+        _.each(dom.audio, function($el, key) {
+            if(key === "full-intro") {
+                $el.get(0).volume = volumes.audio;
+            } else {
+                $el.get(0).volume = 0;
+            }
+        });
+
+        $("video").each(function(i, el) {
+            el.volume = volumes.videos;
+        });
+    }
+
     function stickDivs(scrollY) {
         _.each(dom.chapters, function(val, key) {
-            var $div = val;
+            var $div = val,
+                $divRC = $div.children(".right-container"),
+                divHeight = $div.height(),
+                divOffset = $div.offset().top;
 
             if(key !== "intro") {
-                if($div.offset().top + $div.height() - stickyTop <= scrollY + $div.children(".right-container").height()) {
-                    $div.children(".right-container").addClass("right-container--bottom");
+                if(divOffset + divHeight - stickyTop <= scrollY + $divRC.height()) {
+                    $divRC.addClass("right-container--bottom");
                 } else {
-                    $div.children(".right-container").removeClass("right-container--bottom");
+                    $divRC.removeClass("right-container--bottom");
                 }
 
-                if($div.offset().top - (stickyTop - rightTop) <= scrollY) {
-                    $div.children(".right-container").addClass("right-container--sticky");
+                if(divOffset - (stickyTop - rightTop) <= scrollY) {
+                    $divRC.addClass("right-container--sticky");
                 } else {
-                    $div.children(".right-container").removeClass("right-container--sticky");
+                    $divRC.removeClass("right-container--sticky");
                 }
             }
 
-            if($div.offset().top - 500 <= scrollY && ($div.offset().top + $div.height()) - 500 >= scrollY) {
-                $div.children(".right-container").addClass("visible");
+            if(divOffset - 500 <= scrollY && (divOffset + divHeight) - 500 >= scrollY) {
+                $divRC.addClass("visible");
             } else {
-                $div.children(".right-container").removeClass("visible");
+                $divRC.removeClass("visible");
             }
         
         });
@@ -433,7 +349,7 @@ define([
 
             if($elParent.offset().top - $window.height() + 250 <= scrollY && $window.scrollTop() + 250 < $elParent.offset().top + $elParent.height()) {
                 // $el.parent().css("opacity", "1");
-                $el.get(0).volume = 1;
+                // $el.get(0).volume = 1;
                 $el.get(0).play();
                 $el.css("display", "block");
             } else {
@@ -450,13 +366,17 @@ define([
             if($elParent.hasClass("right-container--sticky") && !$elParent.hasClass("right-container--bottom")) {
                 $el.get(0).play();
                 $el.css("display", "block");
-                // console.log(key);
             } else {
                 $el.get(0).pause();
                 $el.css("display", "none");
             }
         });
-        console.log(dom);
+
+        if(dom.videos.intro.get(0) && scrollY > $window.height()) {
+            dom.videos.intro.get(0).pause();
+            dom.videos.intro.remove();
+            // REPLACE WITH APPROPIATE BG IMAGE!!
+        }
     }
 
     function muteVideo() {
@@ -483,7 +403,7 @@ define([
     }
 
     function resizeVideos() {
-        // if(dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].width() / dom.videos.breaks[Object.keys(dom.videos.breaks)[0]].height() < $body.width() / $body.height()) {
+        if(1.78 < $body.width() / $body.height()) {
             $body.removeClass("non-wide");
 
             _.each(dom.videos.breaks, function($el, key) {
@@ -498,19 +418,19 @@ define([
             $("head").append("<style type='text/css'>.right-container video { margin-left: " + (-(dom.videos.chapters['chapter-1'].closest(".right-container").height()*(16/9) - dom.videos.chapters['chapter-1'].closest(".right-container").width())/2) + "px;}</style>");
 
             dom.videos.intro.css("margin-left", 0);
-        // } else {
-        //     $body.addClass("non-wide");
+        } else {
+            $body.addClass("non-wide");
 
-        //     _.each(dom.videos.breaks, function($el, key) {
-        //         $el.css("margin-left", (-($el.width() - $body.width())/2));
-        //     });
+            _.each(dom.videos.breaks, function($el, key) {
+                $el.css("margin-left", (-($el.width() - $body.width())/2));
+            });
 
-        //     _.each(dom.videos.chapters, function($el, key) {
-        //         $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
-        //     });
+            _.each(dom.videos.chapters, function($el, key) {
+                $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
+            });
 
-        //     dom.videos.intro.css("margin-left", (-(dom.videos.intro.width() - $body.width())/2));
-        // }
+            dom.videos.intro.css("margin-left", (-(dom.videos.intro.width() - $body.width())/2));
+        }
     }
 
     function navStuff(scrollY) {
@@ -543,35 +463,36 @@ define([
             } else if(key === "full-intro") {
                 // dom.navigation.container.removeClass("nav--show");
             }
-
-            if(key === "full-series" && ($el.offset().top + $el.height() <= scrollY)) {
-                // dom.navigation.container.addClass("nav--show");
-
-                $("#series-1").addClass("highlight");
-
-                setTimeout(function() {
-                    $("#series-2").addClass("highlight");
-                }, 1000);
-
-                setTimeout(function() {
-                    $("#series-3").addClass("highlight");
-                }, 2000);
-
-            }
         });
 
         if(section) {
-            $(".nav-chapter--selected").removeClass("nav-chapter--selected");
-            $("#nav-chapter-" + section.slice(-1)).addClass("nav-chapter--selected");
+            // _.each(dom.audio, function($el, key) {
+            //     if(currentAudio.slice(-1) !== key.slice(-1) && !$el.get(0).paused) {
+            //         $el.animate({volume: 0}, 1000, function () {
+            //             console.log(currentAudio, key, "done");
+            //             $el.get(0).pause();
+            //         });
+            //     }
+            // });
+            // dom.audio["chapter-" + section.slice(-1)].animate({volume: 1}, 1000, function() {
+            //     dom.audio["chapter-" + section.slice(-1)].get(0).play();
+            // });
 
             _.each(dom.audio, function($el, key) {
-                $el.get(0).pause();
+                if(currentAudio !== section) {
+
+                    var toPause = currentAudio;
+                    dom.audio[currentAudio].animate({volume: 0}, 1000, function () {
+                        dom.audio[toPause].get(0).pause();
+                    });
+
+                    dom.audio[section].get(0).play();
+                    dom.audio[section].animate({volume: volumes.audio}, 1000);
+
+                    currentAudio = section;
+                }
             });
-
-            // dom.audio["chapter-" + section.slice(-1)].get(0).play();
         }
-
-        dom.navigation.container.find(".change").html(section);
     }
 
     function closeIntro() {
@@ -653,21 +574,23 @@ define([
 
     function preLoad() {
         var imagesLoaded = 0;
-        _.each(images, function(val, key) {
-            var key = new Image(1,1);
-            key.onload = function() {
-                imagesLoaded++;
-                if(imagesLoaded === _.keys(images).length) {
-                    onLoaded();
-                }
-            }
-            key.src = val.high;
-        });
+        // _.each(images, function(val, key) {
+        //     var key = new Image(1,1);
+        //     key.onload = function() {
+        //         imagesLoaded++;
+        //         if(imagesLoaded === _.keys(images).length) {
+        //             onLoaded();
+        //         }
+        //     }
+        //     key.src = val.high;
+        // });
 
-        _.each(videos, function(val, key) {
-            var poster = new Image(1,1);
-            poster.src = val.poster;
-        });
+        // sheets['chapter1'].map(function(row) {
+        //     if(row.anchor !== "") {
+        //          var key = new Image(1,1);
+        //         key.src = "http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + row.anchor + "&format=video/mp4&maxbitrate=2048&poster=1;";
+        //     }
+        // });
 
         if(mobile || tablet) {
             _.each(altImages, function(val, key) {
@@ -677,10 +600,6 @@ define([
                 key.src = val.high;
             });
         }
-    }
-
-    function onLoaded() {
-        $(".close").css("opacity", "1");
     }
 
     function changeImage($anchor) {
@@ -717,26 +636,25 @@ define([
     // }
 
     function changeVideo($anchor) {
-        var $chapter = $anchor.closest(".chapter");
+        var $chapter = $anchor.closest(".chapter"),
+            name = $anchor.attr("name");
 
-        $chapter.find(".right-container").prepend(getVideoNew($anchor.attr("name"), "waiting", true));
+        $chapter.find(".right-container").prepend(getVideoNew(name, "waiting", true, true));
 
-        var $videoWrapper = $chapter.find(".waiting").first();
+        var $videoWrapper = $chapter.find("#" + name);
 
         dom.videos.chapters[$chapter.attr("id")] = $videoWrapper.find("video");
+        $videoWrapper.removeClass("waiting").addClass("top-layer");
 
-        // $video.parent().css("background-image", "url('" + videos[$anchor.attr("name")].poster + "')");
+        var $save = $chapter.find(".top-layer").slice(1);
 
-        setTimeout(function() {
-            $chapter.find(".waiting").removeClass("waiting").addClass("top-layer");
-
-            var $save = $chapter.find(".top-layer").slice(1);
+        dom.videos.chapters[$chapter.attr("id")].on('canplay', function() {
+            // if($save.find("video").length > 0) { $save.find("video").get(0).pause(); }
             $save.addClass("fade-out");
-            
             setTimeout(function() {
                 $save.remove();
-            }, 300);
-        }, 100);
+            }, 500);
+        });
     }
 
     // function changeVideo($anchor) {
@@ -815,16 +733,17 @@ define([
         return "<div class='video-wrapper " + classTag + "' style='background-image: url(\"" + videos[name].poster + "\");'><video preload='none' " + mutedTag + posterTag + " loop " + autoplayTag + ">" + src.mp4 + src.webm + "</video></div>";
     }
 
-    function getVideoNew(name, className, autoplay) {
+    function getVideoNew(name, className, autoplay, loop) {
         var mutedTag = (mute) ? "muted" : "",
             classTag =  (className) ? className : "",
             posterTag = "poster='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1'",
             autoplayTag = (autoplay) ? "autoplay" : "",
+            loopTag = (loop) ? " loop " : "",
             src = {};
         src.mp4 = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048' type='video/mp4'>";
         src.webm = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/webm&maxbitrate=2048' type='video/webm'>";
 
-        return "<div class='video-wrapper " + classTag + "' style='background-image: url(\"http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1\");'><video preload='none' " + mutedTag + posterTag + " loop " + autoplayTag + ">" + src.mp4 + src.webm + "</video></div>";
+        return "<div id='" + name +"' class='video-wrapper " + classTag + "' style='background-image: url(\"http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1\");'><video preload='none' " + mutedTag + posterTag + loopTag + autoplayTag + ">" + src.mp4 + src.webm + "</video></div>";
     }
 
     function seconds2time(seconds) {
