@@ -18,6 +18,7 @@ define([
         sheets,
         $window = $(window),
         $body,
+        fixed = {},
         anchorsFired = new Array(),
         currentAnchors = {},
         lastAnchors = {},
@@ -205,10 +206,17 @@ define([
 
         $(window).scroll(_.debounce(update, 500));
 
+        $.scrollLock(true);
         dom.videos.intro.get(0).oncanplay = function() {
             setTimeout(function() {
                 $(".title-box").addClass("visible");
+
+                setTimeout(function() {
+                    $("#full-intro .large-break-scroll").addClass("visible");
+                    $.scrollLock(false);
+                }, 1000);
             }, 15000);
+
 
             dom.videos.intro.get(0).onended = function() {
                 dom.videos.intro.remove();
@@ -339,8 +347,33 @@ define([
         });
 
         _.each(dom.videos.breaks, function($el, key) {
-            if($el.closest(".full").offset().top <= $window.scrollTop()) {
+            var $full = $el.closest(".full");
+            if($full.offset().top <= $window.scrollTop() && key !== "head-4") {
                 $el.parent(".video-wrapper").css("position", "fixed");
+
+                if(fixed[key] !== true) {
+                    fixed[key] = true;
+
+
+                    setTimeout(function() {
+                        $full.find(".large-break").addClass("visible");
+                    }, 1000);
+
+                    setTimeout(function() {
+                        $full.find(".large-break-title").addClass("visible");
+                    }, 2000);
+
+                    setTimeout(function() {
+                        $full.find(".large-break-quote").addClass("visible");
+                    }, 3000);
+
+                    setTimeout(function() {
+                        $full.find(".large-break-scroll").addClass("visible");
+                        $.scrollLock(false);
+                    }, 4000)
+
+                    $.scrollLock(true);
+                }
             } else {
                 $el.parent(".video-wrapper").css("position", "absolute");
             }
@@ -448,19 +481,15 @@ define([
             if(key === "full-intro" && ($el.offset().top + $el.height() <= scrollY)) {
                 // dom.navigation.container.addClass("nav--show");
 
-                $("#p-1").addClass("p-visible");
-
-                setTimeout(function() {
-                    $("#p-2").addClass("p-visible");
-                }, 1000);
+                $("#p-2").addClass("p-visible");
 
                 setTimeout(function() {
                     $("#p-3").addClass("p-visible");
-                }, 2000);
+                }, 1000);
 
                 setTimeout(function() {
                     $("#p-4").addClass("p-visible");
-                }, 3000);
+                }, 2000);
 
             } else if(key === "full-intro") {
                 // dom.navigation.container.removeClass("nav--show");
@@ -741,27 +770,130 @@ define([
         return "<div id='" + name +"' class='video-wrapper " + classTag + "' style='background-image: url(\"http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1\");'><video preload='none' " + mutedTag + posterTag + loopTag + autoplayTag + ">" + src.mp4 + src.webm + "</video></div>";
     }
 
-    function seconds2time(seconds) {
-        var hours   = Math.floor(seconds / 3600);
-        var minutes = Math.floor((seconds - (hours * 3600)) / 60);
-        var seconds = seconds - (hours * 3600) - (minutes * 60);
-        var time = "";
+    $.scrollLock = ( function scrollLockClosure() {
+        'use strict';
 
-        if (hours != 0) {
-          time = hours+":";
+        var $html      = $( 'html' ),
+            // State: unlocked by default
+            locked     = false,
+            // State: scroll to revert to
+            prevScroll = {
+                scrollLeft : $( window ).scrollLeft(),
+                scrollTop  : $( window ).scrollTop()
+            },
+            // State: styles to revert to
+            prevStyles = {},
+            lockStyles = {
+                'overflow-y' : 'scroll',
+                'position'   : 'fixed',
+                'width'      : '100%'
+            };
+
+        // Instantiate cache in case someone tries to unlock before locking
+        saveStyles();
+
+        // Save context's inline styles in cache
+        function saveStyles() {
+            var styleAttr = $html.attr( 'style' ),
+                styleStrs = [],
+                styleHash = {};
+
+            if( !styleAttr ){
+                return;
+            }
+
+            styleStrs = styleAttr.split( /;\s/ );
+
+            $.each( styleStrs, function serializeStyleProp( styleString ){
+                if( !styleString ) {
+                    return;
+                }
+
+                var keyValue = styleString.split( /\s:\s/ );
+
+                if( keyValue.length < 2 ) {
+                    return;
+                }
+
+                styleHash[ keyValue[ 0 ] ] = keyValue[ 1 ];
+            } );
+
+            $.extend( prevStyles, styleHash );
         }
-        if (minutes != 0 || time !== "") {
-          minutes = (minutes < 10 && time !== "") ? "0"+minutes : String(minutes);
-          time += minutes+":";
+
+        function lock() {
+            var appliedLock = {};
+
+            // Duplicate execution will break DOM statefulness
+            if( locked ) {
+                return;
+            }
+
+            // Save scroll state...
+            prevScroll = {
+                scrollLeft : $( window ).scrollLeft(),
+                scrollTop  : $( window ).scrollTop()
+            };
+
+            // ...and styles
+            saveStyles();
+
+            // Compose our applied CSS
+            $.extend( appliedLock, lockStyles, {
+                // And apply scroll state as styles
+                'left' : - prevScroll.scrollLeft + 'px',
+                'top'  : - prevScroll.scrollTop  + 'px'
+            } );
+
+            // Then lock styles...
+            $html.css( appliedLock );
+
+            // ...and scroll state
+            $( window )
+                .scrollLeft( 0 )
+                .scrollTop( 0 );
+
+            locked = true;
         }
-        if (time === "") {
-          time = seconds+"s";
+
+        function unlock() {
+            // Duplicate execution will break DOM statefulness
+            if( !locked ) {
+                return;
+            }
+
+            // Revert styles
+            $html.attr( 'style', $( '<x>' ).css( prevStyles ).attr( 'style' ) || '' );
+
+            // Revert scroll values
+            $( window )
+                .scrollLeft( prevScroll.scrollLeft )
+                .scrollTop(  prevScroll.scrollTop );
+
+            locked = false;
         }
-        else {
-          time += (seconds < 10) ? "0"+seconds : String(seconds);
-        }
-        return time;
-    }
+
+        return function scrollLock( on ) {
+            // If an argument is passed, lock or unlock depending on truthiness
+            if( arguments.length ) {
+                if( on ) {
+                    lock();
+                }
+                else {
+                    unlock();
+                }
+            }
+            // Otherwise, toggle
+            else {
+                if( locked ){
+                    unlock();
+                }
+                else {
+                    lock();
+                }
+            }
+        };
+    }() );
 
     return {
         init: init

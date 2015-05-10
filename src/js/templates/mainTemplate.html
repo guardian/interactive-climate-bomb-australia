@@ -44,6 +44,7 @@
 					<%= data.intro[0].subheading %>
 				</div>
 			</div>
+			<div class="large-break-scroll"><i></i><div class="text-right">Scroll down to continue</div></div>
 			<!-- <div class="chapter-box">
 				<%= data.intro[0].location %>
 			</div> -->
@@ -59,7 +60,7 @@
 			</div>
 			<div class="text">
 				<div class="text--content first" name="video" data-type="video">
-					<p id="p-1">The Galilee Basin is prized by mining companies as a lucrative new coal frontier.</p>
+					<p id="p-1" class="p-visible">The Galilee Basin is prized by mining companies as a lucrative new coal frontier.</p>
 
 					<p id="p-2">Around 27bn tonnes of coal are thought to be locked under the soil.</p>
 
@@ -75,9 +76,13 @@
 		<div class="full" id="head-<%= i %>" data-mobile-alt="bob">
 			<%= getVideoNew(data['break' + i][0].video, "top-layer", false, true) %>
 			<div class="int-main">
-				<div class="chapter-intro">
+				<div class="large-break"><%= data['break' + i][0].name %></div>
+				<div class="large-break-title"><%= data['break' + i][0].description %></div>
+				<div class="large-break-quote"><%= data['break' + i][0].quote %></div>
+				<div class="large-break-scroll"><i></i><div class="text-right">Scroll down to continue</div></div>
+				<!-- <div class="chapter-intro">
 					<h1><%= data['break' + i][0].title %></h1>
-				</div>
+				</div> -->
 			</div>
 		</div>
 		<div class="int-container">
@@ -87,6 +92,7 @@
 				</div>
 				<div class="text">
 					<div class="text--content first" name="<%= data['chapter' + i][0].anchor %>" data-type="video">
+						<h1><%= data['break' + i][0].title %></h1>
 						<% data['chapter' + i].map(function(row) { %>
 							<% if(row.anchor !== "" && row.rowNumber !== 1) { %><a name="<%= row.anchor %>" data-type="video"></a><% } %>
 
