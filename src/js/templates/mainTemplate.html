@@ -94,6 +94,13 @@
 								<p><%= row.content %></p>
 							<% } %>
 
+							<% if(row.type === "pullquote") { %>
+								<p class="pullquote">
+									<%= row.content %> 
+								</p>
+								<% if(row.meta !== "") { %><p class="pullquote-credit">― <%= row.meta %></p><% } %>
+							<% } %>
+
 							<% if(row.type === "image") { %>
 								<img src="<%= row.content %>" class="<%= row.meta %>">
 							<% } %>
@@ -105,8 +112,7 @@
 	<% } %>
 
 	<div class="full" id="head-4" data-nav-name="The Fourth" data-mobile-alt="bob">
-		<video src="@@assetPath@@/videos/outro.mp4" loop preload="none" class="top-layer">
-		</video>
+		<%= getVideoNew(data['outro'][0].video, "", false, true) %>
 	</div> 
 </div>
 <span class="right-container right-container--sticky" style="display: none;" id="css"></span>

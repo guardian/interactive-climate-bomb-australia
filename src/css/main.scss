@@ -257,8 +257,8 @@ body {
 	color: #aaa;
 	line-height: 1.2em;
 	width: 100%;
-	margin-bottom: 0px !important;
-	margin-top: 48px;
+	margin-bottom: 48px !important;
+	margin-top: 48px !important;
 	font-weight: 400;
 
 	.pullquote-share {
@@ -271,11 +271,13 @@ body {
 	font-size: 16px;
 	color: #aaa;
 	font-weight: 400;
+	margin-bottom: 48px !important;
+  	margin-top: -54px !important;
 }
 
 .right-container {
-	width: calc(100vh - 80px);
-  	height: calc(100vh - 80px);
+	width: calc(100vh);
+  	height: calc(100vh);
 	position: absolute;
 	overflow: hidden;
 	margin-left: 0px;
@@ -542,6 +544,11 @@ body {
 			display: block;
 			transform: rotate(180deg);
 		}
+	}
+
+	.video-wrapper {
+		position: fixed;
+		top: 0;
 	}
 }
 

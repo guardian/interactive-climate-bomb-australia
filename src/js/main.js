@@ -209,6 +209,11 @@ define([
             setTimeout(function() {
                 $(".title-box").addClass("visible");
             }, 15000);
+
+            dom.videos.intro.get(0).onended = function() {
+                dom.videos.intro.remove();
+                $("#Aus1_1_1_h264_mezzanine").css("background-image", "url('@@assetPath@@/imgs/intro.png')");
+            }
         }
 
         resizeVideos();
@@ -375,7 +380,8 @@ define([
         if(dom.videos.intro.get(0) && scrollY > $window.height()) {
             dom.videos.intro.get(0).pause();
             dom.videos.intro.remove();
-            // REPLACE WITH APPROPIATE BG IMAGE!!
+            $("#Aus1_1_1_h264_mezzanine").css("background-image", "url('@@assetPath@@/imgs/intro.png')");
+            $(".title-box").addClass("visible");
         }
     }
 
@@ -423,10 +429,6 @@ define([
 
             _.each(dom.videos.breaks, function($el, key) {
                 $el.css("margin-left", (-($el.width() - $body.width())/2));
-            });
-
-            _.each(dom.videos.chapters, function($el, key) {
-                $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
             });
 
             dom.videos.intro.css("margin-left", (-(dom.videos.intro.width() - $body.width())/2));
@@ -481,29 +483,22 @@ define([
             _.each(dom.audio, function($el, key) {
                 if(currentAudio !== section) {
 
-                    var toPause = currentAudio;
-                    dom.audio[currentAudio].animate({volume: 0}, 1000, function () {
-                        dom.audio[toPause].get(0).pause();
-                    });
+                    if(currentAudio !== "head-4") {
+                        var toPause = currentAudio;
+                        dom.audio[currentAudio].animate({volume: 0}, 1000, function () {
+                            dom.audio[toPause].get(0).pause();
+                        });
+                    }
 
-                    dom.audio[section].get(0).play();
-                    dom.audio[section].animate({volume: volumes.audio}, 1000);
+                    if(section !== "head-4") {
+                        dom.audio[section].get(0).play();
+                        dom.audio[section].animate({volume: volumes.audio}, 1000);
+                    }
 
                     currentAudio = section;
                 }
             });
         }
-    }
-
-    function closeIntro() {
-        $("body").removeClass("intro-visible");
-        if(!mobile) {
-            dom.videos.breaks['head-1'].get(0).play();
-        }
-
-        setTimeout(function() {
-                $(".intro").remove();
-        }, 300);
     }
 
     // function initTicker() {
