@@ -447,6 +447,7 @@ body {
 	.video-wrapper {
 		top: 0;
 		position: absolute;
+		background-position: center center;
 		left: 0;
 		transform: translateZ(0);
 	}
@@ -473,12 +474,12 @@ body {
 #full-intro {
 	.title-box {
 		position: absolute;
-		width: 600px;
+		width: 650px;
 		font-weight: 300;
 		padding-left: 20px;
 		font-family: $egyptian;
 		color: #fff;
-		top: 32%;
+		top: 31%;
 		opacity: 0;
 		transition: opacity 0.3s ease-in;
 
@@ -487,18 +488,18 @@ body {
 		}
 	}
 	.title {
-		line-height: 92px;
-		font-size: 90px;
+		line-height: 105px;
+		font-size: 120px;
 		position: absolute;
 		top: 24px;
-		font-weight: 700;
+		font-weight: 300;
 	}
 	.subheading {
-		font-weight: 500;
+		font-weight: 300;
 		padding-top: 0px;
-		font-size: 32px;
-  		line-height: 38px;
-		top: 218px;
+		font-size: 29px;
+		line-height: 48px;
+		top: 240px;
 		color: #ff9b0b;
 		position: absolute;
 	}

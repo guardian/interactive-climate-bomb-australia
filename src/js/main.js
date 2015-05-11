@@ -206,7 +206,6 @@ define([
 
         $(window).scroll(_.debounce(update, 500));
 
-        $.scrollLock(true);
         dom.videos.intro.get(0).oncanplay = function() {
             setTimeout(function() {
                 $(".title-box").addClass("visible");
@@ -352,7 +351,7 @@ define([
                 $el.parent(".video-wrapper").css("position", "fixed");
 
                 if(fixed[key] !== true) {
-                    fixed[key] = true;
+                    fixed[key] = true; 
 
 
                     setTimeout(function() {
@@ -372,6 +371,7 @@ define([
                         $.scrollLock(false);
                     }, 4000)
 
+                    $full[0].scrollIntoView();
                     $.scrollLock(true);
                 }
             } else {
@@ -442,29 +442,26 @@ define([
     }
 
     function resizeVideos() {
+        $("head").append("<style type='text/css'>.right-container video { margin-left: " + (-(dom.videos.chapters['chapter-1'].closest(".right-container").height()*(16/9) - dom.videos.chapters['chapter-1'].closest(".right-container").width())/2) + "px;}</style>");
         if(1.78 < $body.width() / $body.height()) {
             $body.removeClass("non-wide");
 
-            _.each(dom.videos.breaks, function($el, key) {
-                $el.css("margin-left", 0);
-            });
+            $("head style").append(".full video { margin-left: " + 0 + "px;}");
 
             // videos
             // _.each(dom.videos.chapters, function($el, key) {
             //     $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
             // });
-
-            $("head").append("<style type='text/css'>.right-container video { margin-left: " + (-(dom.videos.chapters['chapter-1'].closest(".right-container").height()*(16/9) - dom.videos.chapters['chapter-1'].closest(".right-container").width())/2) + "px;}</style>");
-
-            dom.videos.intro.css("margin-left", 0);
         } else {
             $body.addClass("non-wide");
 
-            _.each(dom.videos.breaks, function($el, key) {
-                $el.css("margin-left", (-($el.width() - $body.width())/2));
-            });
+            // _.each(dom.videos.breaks, function($el, key) {
+            //     $el.css("margin-left", (-($el.width() - $body.width())/2));
+            // });
 
-            dom.videos.intro.css("margin-left", (-(dom.videos.intro.width() - $body.width())/2));
+            // dom.videos.intro.css("margin-left", -(($body.height()*(16/9) - $body.width()))/2);
+
+            $("head style").append(".full video { margin-left: " + -((($body.height()*(16/9) - $body.width()))/2) + "px;}");
         }
     }
 
