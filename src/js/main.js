@@ -326,14 +326,18 @@ define([
             if(key !== "intro") {
                 if(divOffset + divHeight - stickyTop <= scrollY + $divRC.height()) {
                     $divRC.addClass("right-container--bottom");
+                    $div.addClass("bottom");
                 } else {
                     $divRC.removeClass("right-container--bottom");
+                    $div.removeClass("bottom");
                 }
 
                 if(divOffset - (stickyTop - rightTop) <= scrollY) {
                     $divRC.addClass("right-container--sticky");
+                    $div.addClass("stuck");
                 } else {
                     $divRC.removeClass("right-container--sticky");
+                    $div.removeClass("stuck");
                 }
             }
 
@@ -355,21 +359,17 @@ define([
 
 
                     setTimeout(function() {
+                        $full.find(".large-break-title").addClass("visible");
+                    }, 500);
+
+                    setTimeout(function() {
                         $full.find(".large-break").addClass("visible");
                     }, 1000);
 
                     setTimeout(function() {
-                        $full.find(".large-break-title").addClass("visible");
-                    }, 2000);
-
-                    setTimeout(function() {
-                        $full.find(".large-break-quote").addClass("visible");
-                    }, 3000);
-
-                    setTimeout(function() {
                         $full.find(".large-break-scroll").addClass("visible");
                         $.scrollLock(false);
-                    }, 4000)
+                    }, 1500)
 
                     $full[0].scrollIntoView();
                     $.scrollLock(true);
@@ -478,15 +478,19 @@ define([
             if(key === "full-intro" && ($el.offset().top + $el.height() <= scrollY)) {
                 // dom.navigation.container.addClass("nav--show");
 
-                $("#p-2").addClass("p-visible");
+                // $("#span-1").addClass("highlight");
 
-                setTimeout(function() {
-                    $("#p-3").addClass("p-visible");
-                }, 1000);
+                // setTimeout(function() {
+                //     $("#span-2").addClass("highlight");
+                // }, 500);
 
-                setTimeout(function() {
-                    $("#p-4").addClass("p-visible");
-                }, 2000);
+                // setTimeout(function() {
+                //     $("#span-3").addClass("highlight");
+                // }, 1000);
+
+                // setTimeout(function() {
+                //     $("#span-4").addClass("highlight");
+                // }, 1500);
 
             } else if(key === "full-intro") {
                 // dom.navigation.container.removeClass("nav--show");
@@ -511,14 +515,14 @@ define([
 
                     if(currentAudio !== "head-4") {
                         var toPause = currentAudio;
-                        dom.audio[currentAudio].animate({volume: 0}, 1000, function () {
+                        dom.audio[currentAudio].animate({volume: 0}, 3000, function () {
                             dom.audio[toPause].get(0).pause();
                         });
                     }
 
                     if(section !== "head-4") {
                         dom.audio[section].get(0).play();
-                        dom.audio[section].animate({volume: volumes.audio}, 1000);
+                        dom.audio[section].animate({volume: volumes.audio}, 3000);
                     }
 
                     currentAudio = section;
@@ -634,7 +638,7 @@ define([
 
            setTimeout(function() {
                 $chapter.find(".top-layer").first().remove();
-            }, 300);
+            }, 1000);
         }, 10);
     }
 
@@ -674,7 +678,7 @@ define([
             $save.addClass("fade-out");
             setTimeout(function() {
                 $save.remove();
-            }, 500);
+            }, 1000);
         });
     }
 
@@ -755,7 +759,7 @@ define([
     }
 
     function getVideoNew(name, className, autoplay, loop) {
-        var mutedTag = (mute) ? "muted" : "",
+        var mutedTag = (mute) ? " muted " : "",
             classTag =  (className) ? className : "",
             posterTag = "poster='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1'",
             autoplayTag = (autoplay) ? "autoplay" : "",
@@ -763,7 +767,7 @@ define([
             src = {};
         src.mp4 = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048' type='video/mp4'>";
         src.webm = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/webm&maxbitrate=2048' type='video/webm'>";
-
+        console.log(mute);
         return "<div id='" + name +"' class='video-wrapper " + classTag + "' style='background-image: url(\"http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1\");'><video preload='none' " + mutedTag + posterTag + loopTag + autoplayTag + ">" + src.mp4 + src.webm + "</video></div>";
     }
 
