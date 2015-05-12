@@ -25,6 +25,7 @@ define([
         currentAnchors = {},
         lastAnchors = {},
         currentChapter,
+        pastIntro = false,
         mobile = false,
         tablet = false,
         mute = false,
@@ -33,7 +34,7 @@ define([
         latestKnownScrollY = 0,
         volumes = {
             "videos": 0.5,
-            "audio": 1.0,
+            "audio": 0.6,
         },
         images = {
             "bob": {
@@ -199,6 +200,10 @@ define([
                 saveSelectors();
             }, 100));
 
+            $(".large-break-scroll").click(function(e) {
+                $("html,body").animate({scrollTop: $(e.target).closest(".full").next(".int-container").find(".chapter").offset().top + 20}, 600);
+            }); 
+
             resizeVideos();
 
             dom.videos.intro.get(0).oncanplay = function() {
@@ -208,12 +213,12 @@ define([
                     setTimeout(function() {
                         $("#full-intro .large-break-scroll").addClass("visible");
                     }, 1000);
-                }, 15000);
+                }, 22000);
 
 
                 dom.videos.intro.get(0).onended = function() {
                     dom.videos.intro.remove();
-                    $("#Aus1_1_1_h264_mezzanine").css("background-image", "url('@@assetPath@@/imgs/intro.png')");
+                    $("#full-intro .video-wrapper").css("background-image", "url('@@assetPath@@/imgs/intro.png')");
                 }
             }
         }
@@ -229,11 +234,12 @@ define([
             anchorReplace();
         }
 
-        if(mobile || tablet) {
+        if(mobile || tablet || $window.width() < 1040) {
             _.each(dom.videos.breaks, function($el, key) {
                 $el.prop("controls", true);
             });
             dom.videos.intro.prop("controls", true);
+            dom.videos.intro.prop("autoplay", false);
         }
 
         // dom.videos.chapters['chapter-1'].get(0).addEventListener('loadeddata', function() {
@@ -330,6 +336,7 @@ define([
             var $full = $el.closest(".full");
             if($full.offset().top <= $window.scrollTop() && key !== "head-4") {
                 $el.parent(".video-wrapper").css("position", "fixed");
+                $full.addClass("js-fixed");
 
                 if(fixed[key] !== true) {
                     fixed[key] = true;
@@ -352,8 +359,19 @@ define([
                 }
             } else {
                 $el.parent(".video-wrapper").css("position", "absolute");
+                $full.removeClass("js-fixed");
             }
         });
+
+        if(!pastIntro && window.scrollY > $("#intro").offset().top + 20) {
+            window.scrollTo(0, $("#intro").offset().top + 20);
+            $.scrollLock(true);
+            pastIntro = true;
+
+            setTimeout(function() {
+                $.scrollLock(false);
+            }, 1000);
+        }
     }
 
     function videoControl(scrollY) {
@@ -407,7 +425,7 @@ define([
         if(dom.videos.intro.get(0) && scrollY > $window.height() && $window.width() > 980) {
             dom.videos.intro.get(0).pause();
             dom.videos.intro.remove();
-            $("#Aus1_1_1_h264_mezzanine").css("background-image", "url('@@assetPath@@/imgs/intro.png')");
+            $("#full-intro .video-wrapper").css("background-image", "url('@@assetPath@@/imgs/intro.png')");
             $(".title-box").addClass("visible");
         }
     }

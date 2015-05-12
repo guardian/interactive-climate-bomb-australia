@@ -33,9 +33,10 @@
 			</div>
 		</div>
 	</div>  -->
-	<div class="full top" id="full-intro">
+	<div class="full top js-fixed" id="full-intro"> 
 		<%= getVideoNew(data.intro[0].video, "top-layer", true, false) %>
 		<div class="int-main">
+			<div class="social-bar"><a class="js-mute faux-link"><i class="mute"></i></a><div class="social-icon-int facebook"><i></i></div><div class="social-icon-int twitter"><i></i></div></div>
 			<div class="title-box">
 				<div class="title">
 					<%= data.intro[0].headline %>
@@ -59,13 +60,16 @@
 				
 			</div>
 			<div class="text">
+				<h1 class="show-mobile"><%= data['intro'][0].headline %></h1>
 				<div class="text--content first" name="video" data-type="video">
-					<p class="intro-title">Introduction</p>
-					<p>The <span id="span-1">Galilee Basin</span> is prized by mining companies as a lucrative new coal frontier. Around <span id="span-2">27bn tonnes of coal</span> are thought to be locked under the soil.</p>
+					<p class="intro-title">The Galilee Basin, Queensland  </p>
+					<p>Around 27bn tonnes of coal are thought to be locked under this soil.  A huge complex of coal mines is planned here, in the outback of Queensland, including the world’s largest thermal coal project.</p>
 
-					<p><span id="span-3">Six huge mines</span>, including the world’s largest thermal coal project, are planned.</p>
+					<p>So are railway lines and a massive expansion of the Abbot Point port on the Great Barrier Reef.  </p>
 
-					<p>So are railway lines and a <span id="span-4">massive expansion</span> of the Abbot Point port on the Great Barrier Reef.</p>
+					<p>What will this mean for the Aboriginal community, the Great Barrier Reef and the world's climate?</p>
+
+					<p>Guardian journalists investigate these dirty energy projects, and meet the people who live among them.</p> 
 				</div>
 			</div>
 		</div>
@@ -75,6 +79,7 @@
 		<div class="full" id="head-<%= i %>" data-mobile-alt="bob">
 			<%= getVideoNew(data['break' + i][0].video, "top-layer", false, true) %>
 			<div class="int-main">
+				<div class="social-bar"><a class="js-mute faux-link"><i class="mute"></i></a><div class="social-icon-int facebook"><i></i></div><div class="social-icon-int twitter"><i></i></div></div>
 				<div class="large-break-container">
 					<div class="large-break-title"><%= data['break' + i][0].description %></div>
 					<div class="large-break"><%= data['break' + i][0].title %></div>
@@ -120,8 +125,29 @@
 		</div>
 	<% } %>
 
-	<div class="full" id="head-4" data-nav-name="The Fourth" data-mobile-alt="bob">
+	<div class="full" id="head-4">
 		<%= getVideoNew(data['outro'][0].video, "", false, true) %>
+
+		<div class="int-main">
+			<div class="social-bar"><a class="js-mute faux-link"><i class="mute"></i></a><div class="social-icon-int facebook"><i></i></div><div class="social-icon-int twitter"><i></i></div></div>
+
+			<div class="column column-2">
+				<p><span class="list-title">Produced and directed by</span><span class="list-name">Lindsay Poulton</span></p>
+				<p><span class="list-title">Written by</span><span class="list-name">Oliver Milman</span></p>
+				<p><span class="list-title">Cinematography</span><span class="list-name">David Maurice Smith</span></p>
+				<p><span class="list-title">Commissioning editor</span><span class="list-name">John Mullin</span></p>
+				<p><span class="list-title">Music composed by</span><span class="list-name">Graham Hadfield</span>
+				<p><span class="list-title">Executive Producers</span><span class="list-name">Xaquin Gonzalez & Aron Pilhofer</span>
+			</div>
+			<div class="column column-3">
+				<p><span class="list-title">Interactive development</span><span class="list-name">Josh Holder</span></p>
+				<p><span class="list-title">Interactive design</span><span class="list-name">Monica Ulmanu</span></p>
+				<p><span class="list-title">Interactive producer</span><span class="list-name">Ekaterina Ochagavia</span></p>
+				<p><span class="list-title">With special thanks to</span><span class="list-name" style="line-height: 20px; max-width: 356px;">Francesca Panetta, Alex Purcell, James Randerson, Bill Code, Colinda Langburne</span></p>
+				<div id="keepit"><img class="bottom-logo" src="http://interactive.guim.co.uk/2015/03/climate-change-campaign/assets-1429182577216/imgs/logo_white.png">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ac rhoncus lectus, sit amet mattis erat. Fusce molestie nibh et efficitur ornare.</div>
+			</div>
+			<div class="column column-1"><span>Carbon bomb: Australia</span><%= data.intro[0].headline %></div>
+		</div>
 	</div> 
 </div>
 <span class="right-container right-container--sticky" style="display: none;" id="css"></span>
