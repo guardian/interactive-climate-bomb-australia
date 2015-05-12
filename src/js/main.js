@@ -43,7 +43,7 @@ define([
                     "low": "",
                     "medium": "",
                     "high": "http://www.mapsofworld.com/australia/australia-map.gif",
-                }, 
+                },
             "testLarge": {
                     "low": "",
                     "medium": "",
@@ -85,10 +85,10 @@ define([
             mainHTML = mainTemplate({data: data.sheets, getVideo: getVideo, videos: videos, getVideoNew: getVideoNew}),
             navTemplate = _.template(navTmpl),
             navHTML = navTemplate({});
-            
+
         $body = $("body");
         $("html").css("overflow-y", "scroll");
-        
+
         $(".element-interactive").append(mainHTML)
         $(".element-interactive .story-wrapper").before(navHTML);
 
@@ -217,7 +217,7 @@ define([
                     $("#Aus1_1_1_h264_mezzanine").css("background-image", "url('@@assetPath@@/imgs/intro.png')");
                 }
             }
-        } 
+        }
 
         setAudioLevels();
 
@@ -237,8 +237,8 @@ define([
         // dom.videos.chapters['chapter-1'].get(0).addEventListener('loadeddata', function() {
         //     resizeVideos();
         // }, false);
-        
-        // dom.videos.chapters['chapter-1'].get(0).addEventListener('ended', function(evt) { closeIntro(); }, false); 
+
+        // dom.videos.chapters['chapter-1'].get(0).addEventListener('ended', function(evt) { closeIntro(); }, false);
 
         // $(".intro .close").on("click", function() {
         //     closeIntro();
@@ -331,7 +331,7 @@ define([
             } else {
                 $divRC.removeClass("visible");
             }
-        
+
         });
 
         _.each(dom.videos.breaks, function($el, key) {
@@ -340,7 +340,7 @@ define([
                 $el.parent(".video-wrapper").css("position", "fixed");
 
                 if(fixed[key] !== true) {
-                    fixed[key] = true; 
+                    fixed[key] = true;
 
 
                     setTimeout(function() {
@@ -548,7 +548,7 @@ define([
     //     },250);
     // }
 
-    // function anchorsAction() { 
+    // function anchorsAction() {
     //     _.each(dom.anchors, function(val, key) {
     //         var $el = val;
 
@@ -557,7 +557,7 @@ define([
 
     //             if($el.data("type") === "video") {
     //                 changeVideo($el);
-    //             } 
+    //             }
 
     //             if($el.data("type") === "image") {
     //                 changeImage($el);
@@ -568,7 +568,7 @@ define([
     //     });
     // }
 
-    function anchorsAction(scrollY) { 
+    function anchorsAction(scrollY) {
         _.each(dom.chapters, function(el, chapterName) {
             lastAnchors[chapterName] = "";
 
@@ -584,7 +584,7 @@ define([
 
                 if(lastAnchors[chapterName].data("type") === "video") {
                     changeVideo(lastAnchors[chapterName]);
-                } 
+                }
 
                 if(lastAnchors[chapterName].data("type") === "image") {
                     changeImage(lastAnchors[chapterName]);
@@ -637,7 +637,7 @@ define([
         $chapter.find("img.waiting").attr('src', getImage($anchor.attr("name")));
 
         setTimeout(function() {
-           $chapter.find("img.waiting").removeClass("waiting").addClass("top-layer"); 
+           $chapter.find("img.waiting").removeClass("waiting").addClass("top-layer");
 
            setTimeout(function() {
                 $chapter.find(".top-layer").first().remove();
