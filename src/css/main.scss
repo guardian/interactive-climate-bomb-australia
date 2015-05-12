@@ -384,8 +384,16 @@ body {
 	background-repeat: no-repeat;
 	backface-visibility: hidden;
 
+	@include mq($until: desktop) {
+		height: calc(100vw / (16/9));
+	}
+
 	.int-main {
 		height: 100%;
+
+		@include mq($until: desktop) {
+			display: none;
+		}
 	}
 
 	.logo {
@@ -457,8 +465,10 @@ body {
 		left: 0;
 
 		.non-wide & {
-			width: auto;
-			height: 100%;
+			@include mq(desktop) {
+				width: auto;
+				height: 100%;
+			}
 		}
 	}
 
@@ -468,7 +478,7 @@ body {
 		background-position: center top;
 		left: 0;
 		transform: translateZ(0);
-	}
+	} 
 }
 
 .video-wrapper {
@@ -553,8 +563,10 @@ body {
 	}
 
 	.video-wrapper {
-		position: fixed;
-		top: 0;
+		@include mq(desktop) {
+			position: fixed;
+			top: 0;
+		}
 	}
 }
 
