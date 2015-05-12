@@ -34,7 +34,7 @@
 		</div>
 	</div>  -->
 	<div class="full top" id="full-intro">
-		<%= getVideoNew(data.intro[0].video, "top-layer", true) %>
+		<%= getVideoNew(data.intro[0].video, "top-layer", true, false) %>
 		<div class="int-main">
 			<div class="title-box">
 				<div class="title">
@@ -93,6 +93,7 @@
 					<%= getVideoNew(data['chapter' + i][0].anchor, "top-layer", false, true) %>
 				</div>
 				<div class="text">
+					<h1 class="show-mobile"><%= data['break' + i][0].title %></h1>
 					<div class="text--content first" name="<%= data['chapter' + i][0].anchor %>" data-type="video">
 						<% data['chapter' + i].map(function(row) { %>
 							<% if(row.anchor !== "" && row.rowNumber !== 1) { %><a name="<%= row.anchor %>" data-type="video"></a><% } %>

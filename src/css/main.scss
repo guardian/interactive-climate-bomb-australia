@@ -162,11 +162,30 @@ body {
 			display: none;
 		}
 	}
+
+	h1 {
+		font-family: $egyptian;
+		font-size: 40px;
+		line-height: 46px;
+		font-weight: 300;
+		margin-top: 0;
+  		padding-top: 24px;
+
+  			br {
+  				display: none;
+  			}
+	}
+}
+
+.audio-container {
+	display: none;
 }
 
 .text--content {
-	padding-top: 80px;
-	min-height: 100vh;
+	@include mq(desktop) {
+		padding-top: 80px;
+	}
+
 	a {
 		height: 1px;
 		border: 0;
@@ -197,8 +216,9 @@ body {
 
 	img {
 		width: 100%;
-		margin-top: 24px;
-		margin-bottom: 24px;
+		margin: 48px auto;
+		max-width: 400px;
+		display: block;
 	}
 
 	.map {
@@ -374,7 +394,6 @@ body {
 .full {
 	width: 100%;
 	height: 100vh;
-	background-color: #333;
 	opacity: 1;
 	overflow: hidden;
 	position: relative;
@@ -385,7 +404,7 @@ body {
 	backface-visibility: hidden;
 
 	@include mq($until: desktop) {
-		height: calc(100vw / (16/9));
+		height: auto;
 	}
 
 	.int-main {
@@ -459,10 +478,12 @@ body {
 
 	video {
 		width: 100%;
-		height: auto;
-		position: absolute;
 		top: 0px;
 		left: 0;
+
+		@include mq(desktop) {
+			position: absolute;
+		}
 
 		.non-wide & {
 			@include mq(desktop) {
@@ -474,10 +495,13 @@ body {
 
 	.video-wrapper {
 		top: 0;
-		position: absolute;
 		background-position: center top;
 		left: 0;
 		transform: translateZ(0);
+
+		@include mq(desktop) {
+			position: absolute;
+		}
 	} 
 }
 
@@ -489,6 +513,11 @@ body {
 	background-repeat: no-repeat;
 	transition: opacity 1s;
 	will-change: opacity;
+	line-height: 0;
+
+	@include mq($until: desktop) {
+		background-image: none !important;
+	}
 
 	.full & {
 		border-top: 4px solid #ff9b0b;
@@ -575,6 +604,7 @@ body {
 		padding-top: 100px;
 		font-family: $egyptian;
 		font-size: 28px;
+		padding-bottom: 150px;
 		line-height: 40px;
 		font-weight: 400;
 	}
@@ -882,13 +912,13 @@ body {
 // General
 
 .hide-mobile { 
-	@include mq($until: mobileLandscape) {
+	@include mq($until: desktop) {
 		display: none;
 	}
 }
 
 .show-mobile {
-	@include mq(mobileLandscape) {
+	@include mq(desktop) {
 		display: none;
 	}
 }
@@ -903,7 +933,6 @@ body {
 	position: fixed;
 	top: 0;
 	opacity: 0;
-	background-color: #333;
 	transition: opacity 0.3s ease-in-out;
 	overflow: hidden;
 	background-size: cover;

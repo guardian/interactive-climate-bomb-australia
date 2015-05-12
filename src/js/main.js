@@ -183,11 +183,7 @@ define([
     function initEvents() {
         preLoad();
 
-        if(!mobile && $window.width() > 980) {
-
-            console.log(mobile);
-            console.log($window.width());
-            console.log(!mobile || $window.width() > 980);
+        if(!mobile && !tablet && $window.width() > 980) {
 
             $(window).scroll(_.debounce(update, 500));
 
@@ -217,7 +213,7 @@ define([
                     $("#Aus1_1_1_h264_mezzanine").css("background-image", "url('@@assetPath@@/imgs/intro.png')");
                 }
             }
-        } 
+        }
 
         setAudioLevels();
 
@@ -230,8 +226,11 @@ define([
             anchorReplace();
         }
 
-        if(mobile) {
-            breaksReplace();
+        if(mobile || tablet) {
+            _.each(dom.videos.breaks, function($el, key) {
+                $el.prop("controls", true);
+            });
+            dom.videos.intro.prop("controls", true);
         }
 
         // dom.videos.chapters['chapter-1'].get(0).addEventListener('loadeddata', function() {
@@ -275,16 +274,6 @@ define([
         //     $el.after("<div class='mobile-alt' style='background-image: url(\"" + getAltImage($el.data('mobile-alt')) + "\");'></img>");
         //     $el.remove();
         // });
-    }
-
-    function breaksReplace() {
-        _.each(dom.breaks, function($el, key) {
-            $el.find("video").remove();
-            $el.css("background-image", "url('" + getAltImage($el.data('mobile-alt')) + "')");
-        });
-        dom.videos.intro.parent().css("background-image", "url('" + getAltImage(dom.videos.intro.parent().data('mobile-alt')) + "')");
-        dom.videos.intro.remove();
-
     }
 
     function setAudioLevels() {
@@ -341,7 +330,6 @@ define([
 
                 if(fixed[key] !== true) {
                     fixed[key] = true; 
-
 
                     setTimeout(function() {
                         $full.find(".large-break-title").addClass("visible");
@@ -413,7 +401,7 @@ define([
             }
         });
 
-        if(dom.videos.intro.get(0) && scrollY > $window.height()) {
+        if(dom.videos.intro.get(0) && scrollY > $window.height() && $window.width() > 980) {
             dom.videos.intro.get(0).pause();
             dom.videos.intro.remove();
             $("#Aus1_1_1_h264_mezzanine").css("background-image", "url('@@assetPath@@/imgs/intro.png')");
@@ -764,7 +752,7 @@ define([
         src.mp4 = (videos[name].mp4) ? "<source src='" + videos[name].mp4 + "' type='video/mp4'>" : "";
         src.webm = (videos[name].webm) ? "<source src='" + videos[name].webm + "' type='video/webm'>" : "";
 
-        return "<div class='video-wrapper " + classTag + "' style='background-image: url(\"" + videos[name].poster + "\");'><video preload='none' " + mutedTag + posterTag + " loop " + autoplayTag + ">" + src.mp4 + src.webm + "</video></div>";
+        return "<div class='video-wrapper " + classTag + "' style='background-image: url(\"" + videos[name].poster + "\");'><video preload='metadata' " + mutedTag + posterTag + " loop " + autoplayTag + ">" + src.mp4 + src.webm + "</video></div>";
     }
 
     function getVideoNew(name, className, autoplay, loop) {
@@ -776,8 +764,7 @@ define([
             src = {};
         src.mp4 = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048' type='video/mp4'>";
         src.webm = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/webm&maxbitrate=2048' type='video/webm'>";
-        console.log(mute);
-        return "<div id='" + name +"' class='video-wrapper " + classTag + "' style='background-image: url(\"http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1\");'><video preload='none' " + mutedTag + posterTag + loopTag + autoplayTag + ">" + src.mp4 + src.webm + "</video></div>";
+        return "<div id='" + name +"' class='video-wrapper " + classTag + "' style='background-image: url(\"http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1\");'><video preload='metadata' " + mutedTag + posterTag + loopTag + autoplayTag + " >" + src.mp4 + src.webm + "</video></div>";
     }
 
     $.scrollLock = ( function scrollLockClosure() {
