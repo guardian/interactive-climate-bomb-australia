@@ -1,11 +1,13 @@
 define([
     'jquery',
+    'jQuery-ajaxTransport-XDomainRequest',
     'lodash',
     'bowser',
     'text!templates/mainTemplate.html',
     'text!templates/navTemplate.html'
 ], function(
     $,
+    jqueryAjaxPlugin,
     _,
     bowser,
     mainTmpl,
@@ -70,7 +72,8 @@ define([
         whatBrowser();
         $.ajax({
             url: "http://interactive.guim.co.uk/spreadsheetdata/0AjKEhS-Bj-4DdHBhTW5Sc3lMdmZJX1JJZS11OU1HQ1E.json",
-            cache: false
+            cache: false,
+            crossDomain: true
         })
         .done(function(data) {
             data = typeof data === 'string' ? JSON.parse(data) : data;
