@@ -18,6 +18,7 @@ define([
         sheets,
         $window = $(window),
         $body,
+        fixed = {},
         anchorsFired = new Array(),
         currentAnchors = {},
         lastAnchors = {},
@@ -50,17 +51,6 @@ define([
                 }
             },
         videos = {
-            "intro": {
-                "poster": "@@assetPath@@/videos/intro.png",
-                "webm": "",
-                "mp4": "@@assetPath@@/videos/intro.mp4",
-            },
-            "loop": {
-                    "poster": "@@assetPath@@/videos/posters/poster.png",
-                    "low": "",
-                    "medium": "",
-                    "high": "@@assetPath@@/videos/loop.mp4",
-            },
         },
         altImages = {
             "bob": {
@@ -193,25 +183,41 @@ define([
     function initEvents() {
         preLoad();
 
-        // if(!mobile) {
-        //     $(window).scroll(_.throttle(function() {
-        //         // $(".chapter-intro").toggleClass("chapter-intro-animate");
-        //         stickDivs();
-        //         videoControl();
-        //         // showNav();
-        //         anchorsAction();
-        //     }, 20));
-        // } 
+        if(!mobile && $window.width() > 980) {
 
-        $(window).scroll(_.debounce(update, 500));
+            console.log(mobile);
+            console.log($window.width());
+            console.log(!mobile || $window.width() > 980);
 
-        dom.videos.intro.get(0).oncanplay = function() {
-            setTimeout(function() {
-                $(".title-box").addClass("visible");
-            }, 15000);
-        }
+            $(window).scroll(_.debounce(update, 500));
 
-        resizeVideos();
+            $(window).scroll(_.throttle(function() {
+                stickDivs(window.scrollY);
+            }, 30));
+
+            $(window).resize(_.throttle(function() {
+                resizeVideos();
+                saveSelectors();
+            }, 100));
+
+            resizeVideos();
+
+            dom.videos.intro.get(0).oncanplay = function() {
+                setTimeout(function() {
+                    $(".title-box").addClass("visible");
+
+                    setTimeout(function() {
+                        $("#full-intro .large-break-scroll").addClass("visible");
+                    }, 1000);
+                }, 15000);
+
+
+                dom.videos.intro.get(0).onended = function() {
+                    dom.videos.intro.remove();
+                    $("#Aus1_1_1_h264_mezzanine").css("background-image", "url('@@assetPath@@/imgs/intro.png')");
+                }
+            }
+        } 
 
         setAudioLevels();
 
@@ -219,10 +225,6 @@ define([
         //     var currentScrollY = latestKnownScrollY;
         //     anchorsAction(currentScrollY);
         // }, 100));
-
-        $(window).scroll(_.throttle(function() {
-            stickDivs(window.scrollY);
-        }, 30));
 
         if((mobile || tablet) || $window.width() < 1040) {
             anchorReplace();
@@ -235,11 +237,6 @@ define([
         // dom.videos.chapters['chapter-1'].get(0).addEventListener('loadeddata', function() {
         //     resizeVideos();
         // }, false);
-
-        $(window).resize(_.throttle(function() {
-                resizeVideos();
-                saveSelectors();
-        }, 100));
         
         // dom.videos.chapters['chapter-1'].get(0).addEventListener('ended', function(evt) { closeIntro(); }, false); 
 
@@ -272,12 +269,12 @@ define([
     }
 
     function anchorReplace() {
-        _.each(dom.anchors, function(val, key) {
-            var $el = val;
+        // _.each(dom.anchors, function(val, key) {
+        //     var $el = val;
 
-            $el.after("<div class='mobile-alt' style='background-image: url(\"" + getAltImage($el.data('mobile-alt')) + "\");'></img>");
-            $el.remove();
-        });
+        //     $el.after("<div class='mobile-alt' style='background-image: url(\"" + getAltImage($el.data('mobile-alt')) + "\");'></img>");
+        //     $el.remove();
+        // });
     }
 
     function breaksReplace() {
@@ -314,14 +311,18 @@ define([
             if(key !== "intro") {
                 if(divOffset + divHeight - stickyTop <= scrollY + $divRC.height()) {
                     $divRC.addClass("right-container--bottom");
+                    $div.addClass("bottom");
                 } else {
                     $divRC.removeClass("right-container--bottom");
+                    $div.removeClass("bottom");
                 }
 
                 if(divOffset - (stickyTop - rightTop) <= scrollY) {
                     $divRC.addClass("right-container--sticky");
+                    $div.addClass("stuck");
                 } else {
                     $divRC.removeClass("right-container--sticky");
+                    $div.removeClass("stuck");
                 }
             }
 
@@ -334,8 +335,30 @@ define([
         });
 
         _.each(dom.videos.breaks, function($el, key) {
-            if($el.closest(".full").offset().top <= $window.scrollTop()) {
+            var $full = $el.closest(".full");
+            if($full.offset().top <= $window.scrollTop() && key !== "head-4") {
                 $el.parent(".video-wrapper").css("position", "fixed");
+
+                if(fixed[key] !== true) {
+                    fixed[key] = true; 
+
+
+                    setTimeout(function() {
+                        $full.find(".large-break-title").addClass("visible");
+                    }, 500);
+
+                    setTimeout(function() {
+                        $full.find(".large-break").addClass("visible");
+                    }, 1000);
+
+                    setTimeout(function() {
+                        $full.find(".large-break-scroll").addClass("visible");
+                        $.scrollLock(false);
+                    }, 1500)
+
+                    $full[0].scrollIntoView();
+                    $.scrollLock(true);
+                }
             } else {
                 $el.parent(".video-wrapper").css("position", "absolute");
             }
@@ -350,12 +373,21 @@ define([
             if($elParent.offset().top - $window.height() + 250 <= scrollY && $window.scrollTop() + 250 < $elParent.offset().top + $elParent.height()) {
                 // $el.parent().css("opacity", "1");
                 // $el.get(0).volume = 1;
-                $el.get(0).play();
-                $el.css("display", "block");
+                if($el.get(0).paused) {
+                    $el.prop("volume", 0);
+                    $el.get(0).play();
+                    $el.animate({volume: volumes.videos}, 1000);
+                    $el.css("display", "block");
+                }
             } else {
                 // $el.parent().css("opacity", "0");
-                $el.get(0).pause();
-                $el.css("display", "none");
+                if(!$el.get(0).paused) {
+                    $el.animate({volume: 0}, 1000);
+                    setTimeout(function() {
+                        $el.get(0).pause();
+                    }, 1000);
+                    $el.css("display", "none");
+                }
             }
         });
 
@@ -364,18 +396,28 @@ define([
                 $elParent = $el.closest(".right-container");
 
             if($elParent.hasClass("right-container--sticky") && !$elParent.hasClass("right-container--bottom")) {
-                $el.get(0).play();
-                $el.css("display", "block");
+                if($el.get(0).paused) {
+                    $el.prop("volume", 0);
+                    $el.get(0).play();
+                    $el.animate({volume: volumes.videos}, 1000);
+                    $el.css("display", "block");
+                }
             } else {
-                $el.get(0).pause();
-                $el.css("display", "none");
+                if(!$el.get(0).paused) {
+                    $el.animate({volume: volumes.videos}, 1000);
+                    setTimeout(function() {
+                        $el.get(0).pause();
+                    }, 1000);
+                    $el.css("display", "none");
+                }
             }
         });
 
         if(dom.videos.intro.get(0) && scrollY > $window.height()) {
             dom.videos.intro.get(0).pause();
             dom.videos.intro.remove();
-            // REPLACE WITH APPROPIATE BG IMAGE!!
+            $("#Aus1_1_1_h264_mezzanine").css("background-image", "url('@@assetPath@@/imgs/intro.png')");
+            $(".title-box").addClass("visible");
         }
     }
 
@@ -403,33 +445,26 @@ define([
     }
 
     function resizeVideos() {
+        $("head").append("<style type='text/css'>.right-container video { margin-left: " + (-(dom.videos.chapters['chapter-1'].closest(".right-container").height()*(16/9) - dom.videos.chapters['chapter-1'].closest(".right-container").width())/2) + "px;}</style>");
         if(1.78 < $body.width() / $body.height()) {
             $body.removeClass("non-wide");
 
-            _.each(dom.videos.breaks, function($el, key) {
-                $el.css("margin-left", 0);
-            });
+            $("head style").append(".full video { margin-left: " + 0 + "px;}");
 
             // videos
             // _.each(dom.videos.chapters, function($el, key) {
             //     $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
             // });
-
-            $("head").append("<style type='text/css'>.right-container video { margin-left: " + (-(dom.videos.chapters['chapter-1'].closest(".right-container").height()*(16/9) - dom.videos.chapters['chapter-1'].closest(".right-container").width())/2) + "px;}</style>");
-
-            dom.videos.intro.css("margin-left", 0);
         } else {
             $body.addClass("non-wide");
 
-            _.each(dom.videos.breaks, function($el, key) {
-                $el.css("margin-left", (-($el.width() - $body.width())/2));
-            });
+            // _.each(dom.videos.breaks, function($el, key) {
+            //     $el.css("margin-left", (-($el.width() - $body.width())/2));
+            // });
 
-            _.each(dom.videos.chapters, function($el, key) {
-                $el.css("margin-left", (-($el.width() - $el.parent(".right-container").width())/2));
-            });
+            // dom.videos.intro.css("margin-left", -(($body.height()*(16/9) - $body.width()))/2);
 
-            dom.videos.intro.css("margin-left", (-(dom.videos.intro.width() - $body.width())/2));
+            $("head style").append(".full video { margin-left: " + -((($body.height()*(16/9) - $body.width()))/2) + "px;}");
         }
     }
 
@@ -446,19 +481,19 @@ define([
             if(key === "full-intro" && ($el.offset().top + $el.height() <= scrollY)) {
                 // dom.navigation.container.addClass("nav--show");
 
-                $("#p-1").addClass("p-visible");
+                // $("#span-1").addClass("highlight");
 
-                setTimeout(function() {
-                    $("#p-2").addClass("p-visible");
-                }, 1000);
+                // setTimeout(function() {
+                //     $("#span-2").addClass("highlight");
+                // }, 500);
 
-                setTimeout(function() {
-                    $("#p-3").addClass("p-visible");
-                }, 2000);
+                // setTimeout(function() {
+                //     $("#span-3").addClass("highlight");
+                // }, 1000);
 
-                setTimeout(function() {
-                    $("#p-4").addClass("p-visible");
-                }, 3000);
+                // setTimeout(function() {
+                //     $("#span-4").addClass("highlight");
+                // }, 1500);
 
             } else if(key === "full-intro") {
                 // dom.navigation.container.removeClass("nav--show");
@@ -481,29 +516,22 @@ define([
             _.each(dom.audio, function($el, key) {
                 if(currentAudio !== section) {
 
-                    var toPause = currentAudio;
-                    dom.audio[currentAudio].animate({volume: 0}, 1000, function () {
-                        dom.audio[toPause].get(0).pause();
-                    });
+                    if(currentAudio !== "head-4") {
+                        var toPause = currentAudio;
+                        dom.audio[currentAudio].animate({volume: 0}, 3000, function () {
+                            dom.audio[toPause].get(0).pause();
+                        });
+                    }
 
-                    dom.audio[section].get(0).play();
-                    dom.audio[section].animate({volume: volumes.audio}, 1000);
+                    if(section !== "head-4") {
+                        dom.audio[section].get(0).play();
+                        dom.audio[section].animate({volume: volumes.audio}, 3000);
+                    }
 
                     currentAudio = section;
                 }
             });
         }
-    }
-
-    function closeIntro() {
-        $("body").removeClass("intro-visible");
-        if(!mobile) {
-            dom.videos.breaks['head-1'].get(0).play();
-        }
-
-        setTimeout(function() {
-                $(".intro").remove();
-        }, 300);
     }
 
     // function initTicker() {
@@ -613,7 +641,7 @@ define([
 
            setTimeout(function() {
                 $chapter.find(".top-layer").first().remove();
-            }, 300);
+            }, 1000);
         }, 10);
     }
 
@@ -644,6 +672,8 @@ define([
         var $videoWrapper = $chapter.find("#" + name);
 
         dom.videos.chapters[$chapter.attr("id")] = $videoWrapper.find("video");
+        dom.videos.chapters[$chapter.attr("id")].prop("volume", 0);
+
         $videoWrapper.removeClass("waiting").addClass("top-layer");
 
         var $save = $chapter.find(".top-layer").slice(1);
@@ -651,9 +681,13 @@ define([
         dom.videos.chapters[$chapter.attr("id")].on('canplay', function() {
             // if($save.find("video").length > 0) { $save.find("video").get(0).pause(); }
             $save.addClass("fade-out");
+            $save.find("video").animate({volume: 0}, 1000);
+
+            dom.videos.chapters[$chapter.attr("id")].animate({volume: volumes.videos}, 1000);
+
             setTimeout(function() {
                 $save.remove();
-            }, 500);
+            }, 1000);
         });
     }
 
@@ -734,7 +768,7 @@ define([
     }
 
     function getVideoNew(name, className, autoplay, loop) {
-        var mutedTag = (mute) ? "muted" : "",
+        var mutedTag = (mute) ? " muted " : "",
             classTag =  (className) ? className : "",
             posterTag = "poster='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1'",
             autoplayTag = (autoplay) ? "autoplay" : "",
@@ -742,31 +776,134 @@ define([
             src = {};
         src.mp4 = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048' type='video/mp4'>";
         src.webm = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/webm&maxbitrate=2048' type='video/webm'>";
-
+        console.log(mute);
         return "<div id='" + name +"' class='video-wrapper " + classTag + "' style='background-image: url(\"http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1\");'><video preload='none' " + mutedTag + posterTag + loopTag + autoplayTag + ">" + src.mp4 + src.webm + "</video></div>";
     }
 
-    function seconds2time(seconds) {
-        var hours   = Math.floor(seconds / 3600);
-        var minutes = Math.floor((seconds - (hours * 3600)) / 60);
-        var seconds = seconds - (hours * 3600) - (minutes * 60);
-        var time = "";
+    $.scrollLock = ( function scrollLockClosure() {
+        'use strict';
 
-        if (hours != 0) {
-          time = hours+":";
+        var $html      = $( 'html' ),
+            // State: unlocked by default
+            locked     = false,
+            // State: scroll to revert to
+            prevScroll = {
+                scrollLeft : $( window ).scrollLeft(),
+                scrollTop  : $( window ).scrollTop()
+            },
+            // State: styles to revert to
+            prevStyles = {},
+            lockStyles = {
+                'overflow-y' : 'scroll',
+                'position'   : 'fixed',
+                'width'      : '100%'
+            };
+
+        // Instantiate cache in case someone tries to unlock before locking
+        saveStyles();
+
+        // Save context's inline styles in cache
+        function saveStyles() {
+            var styleAttr = $html.attr( 'style' ),
+                styleStrs = [],
+                styleHash = {};
+
+            if( !styleAttr ){
+                return;
+            }
+
+            styleStrs = styleAttr.split( /;\s/ );
+
+            $.each( styleStrs, function serializeStyleProp( styleString ){
+                if( !styleString ) {
+                    return;
+                }
+
+                var keyValue = styleString.split( /\s:\s/ );
+
+                if( keyValue.length < 2 ) {
+                    return;
+                }
+
+                styleHash[ keyValue[ 0 ] ] = keyValue[ 1 ];
+            } );
+
+            $.extend( prevStyles, styleHash );
         }
-        if (minutes != 0 || time !== "") {
-          minutes = (minutes < 10 && time !== "") ? "0"+minutes : String(minutes);
-          time += minutes+":";
+
+        function lock() {
+            var appliedLock = {};
+
+            // Duplicate execution will break DOM statefulness
+            if( locked ) {
+                return;
+            }
+
+            // Save scroll state...
+            prevScroll = {
+                scrollLeft : $( window ).scrollLeft(),
+                scrollTop  : $( window ).scrollTop()
+            };
+
+            // ...and styles
+            saveStyles();
+
+            // Compose our applied CSS
+            $.extend( appliedLock, lockStyles, {
+                // And apply scroll state as styles
+                'left' : - prevScroll.scrollLeft + 'px',
+                'top'  : - prevScroll.scrollTop  + 'px'
+            } );
+
+            // Then lock styles...
+            $html.css( appliedLock );
+
+            // ...and scroll state
+            $( window )
+                .scrollLeft( 0 )
+                .scrollTop( 0 );
+
+            locked = true;
         }
-        if (time === "") {
-          time = seconds+"s";
+
+        function unlock() {
+            // Duplicate execution will break DOM statefulness
+            if( !locked ) {
+                return;
+            }
+
+            // Revert styles
+            $html.attr( 'style', $( '<x>' ).css( prevStyles ).attr( 'style' ) || '' );
+
+            // Revert scroll values
+            $( window )
+                .scrollLeft( prevScroll.scrollLeft )
+                .scrollTop(  prevScroll.scrollTop );
+
+            locked = false;
         }
-        else {
-          time += (seconds < 10) ? "0"+seconds : String(seconds);
-        }
-        return time;
-    }
+
+        return function scrollLock( on ) {
+            // If an argument is passed, lock or unlock depending on truthiness
+            if( arguments.length ) {
+                if( on ) {
+                    lock();
+                }
+                else {
+                    unlock();
+                }
+            }
+            // Otherwise, toggle
+            else {
+                if( locked ){
+                    unlock();
+                }
+                else {
+                    lock();
+                }
+            }
+        };
+    }() );
 
     return {
         init: init

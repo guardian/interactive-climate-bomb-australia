@@ -44,6 +44,7 @@
 					<%= data.intro[0].subheading %>
 				</div>
 			</div>
+			<div class="large-break-scroll"><i></i><div class="text-right">Scroll down to continue</div></div>
 			<!-- <div class="chapter-box">
 				<%= data.intro[0].location %>
 			</div> -->
@@ -59,13 +60,12 @@
 			</div>
 			<div class="text">
 				<div class="text--content first" name="video" data-type="video">
-					<p id="p-1">The Galilee Basin is prized by mining companies as a lucrative new coal frontier.</p>
+					<p class="intro-title">Introduction</p>
+					<p>The <span id="span-1">Galilee Basin</span> is prized by mining companies as a lucrative new coal frontier. Around <span id="span-2">27bn tonnes of coal</span> are thought to be locked under the soil.</p>
 
-					<p id="p-2">Around 27bn tonnes of coal are thought to be locked under the soil.</p>
+					<p><span id="span-3">Six huge mines</span>, including the world’s largest thermal coal project, are planned.</p>
 
-					<p id="p-3">Six huge mines, including the world’s largest thermal coal project, are planned.</p>
-
-					<p id="p-4">So are railway lines and a massive expansion of the Abbot Point port on the Great Barrier Reef.</p>
+					<p>So are railway lines and a <span id="span-4">massive expansion</span> of the Abbot Point port on the Great Barrier Reef.</p>
 				</div>
 			</div>
 		</div>
@@ -75,13 +75,20 @@
 		<div class="full" id="head-<%= i %>" data-mobile-alt="bob">
 			<%= getVideoNew(data['break' + i][0].video, "top-layer", false, true) %>
 			<div class="int-main">
-				<div class="chapter-intro">
-					<h1><%= data['break' + i][0].title %></h1>
+				<div class="large-break-container">
+					<div class="large-break-title"><%= data['break' + i][0].description %></div>
+					<div class="large-break"><%= data['break' + i][0].title %></div>
 				</div>
+				<!-- <div class="large-break-quote"><%= data['break' + i][0].quote %></div> -->
+				<div class="large-break-scroll"><i></i><div class="text-right">Scroll down to continue</div></div>
+				<!-- <div class="chapter-intro">
+					<h1><%= data['break' + i][0].title %></h1>
+				</div> -->
 			</div>
 		</div>
 		<div class="int-container">
-			<div class="int-main chapter" id="chapter-<%= i %>">
+			<div class="int-main chapter chapter-real" id="chapter-<%= i %>">
+				<div class="social-bar"><a class="js-mute faux-link"><i class="mute"></i></a><div class="social-icon-int facebook"><i></i></div><div class="social-icon-int twitter"><i></i></div></div>
 				<div class="right-container">
 					<%= getVideoNew(data['chapter' + i][0].anchor, "top-layer", false, true) %>
 				</div>
@@ -92,6 +99,14 @@
 
 							<% if(row.type === "paragraph") { %>
 								<p><%= row.content %></p>
+							<% } %>
+
+							<% if(row.type === "pullquote") { %>
+								<hr/>
+								<p class="pullquote">
+									<%= row.content %> 
+								</p>
+								<% if(row.meta !== "") { %><p class="pullquote-credit">― <%= row.meta %></p><% } %>
 							<% } %>
 
 							<% if(row.type === "image") { %>
@@ -105,8 +120,7 @@
 	<% } %>
 
 	<div class="full" id="head-4" data-nav-name="The Fourth" data-mobile-alt="bob">
-		<video src="@@assetPath@@/videos/outro.mp4" loop preload="none" class="top-layer">
-		</video>
+		<%= getVideoNew(data['outro'][0].video, "", false, true) %>
 	</div> 
 </div>
 <span class="right-container right-container--sticky" style="display: none;" id="css"></span>
