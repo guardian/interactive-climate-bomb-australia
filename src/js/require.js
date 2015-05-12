@@ -20,7 +20,8 @@ require.config({
     text: "../../bower_components/text/text",
     bowser: "../../bower_components/bowser/bowser",
     lodash: "../../bower_components/lodash/lodash",
-    fastdom: "../../bower_components/fastdom/index"
+    fastdom: "../../bower_components/fastdom/index",
+    "jQuery-ajaxTransport-XDomainRequest": "../../bower_components/jQuery-ajaxTransport-XDomainRequest/jquery.xdomainrequest.min"
   },
   packages: [
 
