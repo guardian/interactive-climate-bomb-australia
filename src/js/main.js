@@ -3,6 +3,7 @@ define([
     'jQuery-ajaxTransport-XDomainRequest',
     'lodash',
     'bowser',
+    'viewportSize',
     'text!templates/mainTemplate.html',
     'text!templates/navTemplate.html'
 ], function(
@@ -10,11 +11,11 @@ define([
     jqueryAjaxPlugin,
     _,
     bowser,
+    viewportSize,
     mainTmpl,
     navTmpl
 ) {
    'use strict';
-
     var rightTop,
         stickyTop,
         sheets,
@@ -25,6 +26,7 @@ define([
         currentAnchors = {},
         lastAnchors = {},
         currentChapter,
+        windowWidth = viewportSize.getWidth(),
         pastIntro = false,
         mobile = false,
         tablet = false,
@@ -33,8 +35,8 @@ define([
         ticking = false,
         latestKnownScrollY = 0,
         volumes = {
-            "videos": 0.5,
-            "audio": 0.6,
+            "videos": 0.6,
+            "audio": 0.5,
         },
         images = {
             "bob": {
@@ -171,7 +173,9 @@ define([
         rightTop = parseInt($("#css-rc").css("top"));
         stickyTop = parseInt($("#css").css("top"), 10);
 
-        console.log(dom);
+        dom.intro = {}
+        dom.intro['right'] = $("#intro .right-container");
+        dom.intro['div'] = $("#intro");
     }
 
     function whatBrowser() {
@@ -187,7 +191,7 @@ define([
     function initEvents() {
         preLoad();
 
-        if(!mobile && !tablet && $window.width() > 980) {
+        if(!mobile && !tablet && viewportSize.getWidth() > 980) {
 
             $(window).scroll(_.debounce(update, 500));
 
@@ -211,7 +215,7 @@ define([
                     $(".title-box").addClass("visible");
 
                     setTimeout(function() {
-                        $("#full-intro .large-break-scroll").addClass("visible");
+                        $("#full-intro .large-break-scroll").addClass("scroll-visible");
                     }, 1000);
                 }, 22000);
 
@@ -223,6 +227,18 @@ define([
             }
         }
 
+        $window.resize(_.debounce(function(){
+            if((viewportSize.getWidth() > 980 && viewportSize.getWidth() < 980) || (viewportSize.getWidth() < 980 && windowWidth > 980) ) {
+                location.reload();
+            }
+            windowWidth = viewportSize.getWidth();
+        }, 500));
+
+        $window.on("orientationchange", _.debounce(function(){
+            location.reload();
+            windowWidth = viewportSize.getWidth();
+        }, 500));
+
         setAudioLevels();
 
         // $(window).scroll(_.debounce(function() {
@@ -230,17 +246,31 @@ define([
         //     anchorsAction(currentScrollY);
         // }, 100));
 
-        if((mobile || tablet) || $window.width() < 1040) {
+        if((mobile || tablet) || viewportSize.getWidth() < 980) {
             anchorReplace();
         }
 
-        if(mobile || tablet || $window.width() < 1040) {
+        if(mobile || tablet || viewportSize.getWidth() < 980) {
             _.each(dom.videos.breaks, function($el, key) {
                 $el.prop("controls", true);
             });
             dom.videos.intro.prop("controls", true);
             dom.videos.intro.prop("autoplay", false);
         }
+
+        if(tablet || mobile) {
+            $("head").append("<style>.full video, .full { height:" + viewportSize.getWidth()/(16/9) + "px; }</style>");
+            $("#full-intro .video-wrapper").css("position", "absolute");
+        }
+
+        if(tablet && viewportSize.getWidth() > 980) {
+            $("head").append("<style>.text { width: 100%; max-width: 620px; } .right-container { display: none; } .mute { display: none; }</style>");
+        }
+
+        $("#show-credits").click(function() {
+            $(".column").addClass("credits-visible");
+            $("#show-credits").css("opacity", "0");
+        });
 
         // dom.videos.chapters['chapter-1'].get(0).addEventListener('loadeddata', function() {
         //     resizeVideos();
@@ -350,7 +380,7 @@ define([
                     }, 1000);
 
                     setTimeout(function() {
-                        $full.find(".large-break-scroll").addClass("visible");
+                        $full.find(".large-break-scroll").addClass("scroll-visible");
                         $.scrollLock(false);
                     }, 1500)
 
@@ -372,6 +402,19 @@ define([
                 $.scrollLock(false);
             }, 1000);
         }
+
+        if(window.scrollY > dom.intro['div'].offset().top) {
+            dom.intro['right'].addClass("right-container--sticky");
+
+            if(dom.intro['div'].offset().top + dom.intro['div'].height() < window.scrollY) {
+                dom.intro['right'].addClass("right-container--bottom");
+            } else {
+                dom.intro['right'].removeClass("right-container--bottom");
+            }
+        } else {
+            dom.intro['right'].removeClass("right-container--sticky");
+            dom.intro['right'].removeClass("right-container--bottom");
+        }
     }
 
     function videoControl(scrollY) {
@@ -384,6 +427,7 @@ define([
                 // $el.get(0).volume = 1;
                 if($el.get(0).paused) {
                     $el.prop("volume", 0);
+                    $el.get(0).load();
                     $el.get(0).play();
                     $el.animate({volume: volumes.videos}, 1000);
                     $el.css("display", "block");
@@ -422,7 +466,7 @@ define([
             }
         });
 
-        if(dom.videos.intro.get(0) && scrollY > $window.height() && $window.width() > 980) {
+        if(dom.videos.intro.get(0) && scrollY > $window.height() && viewportSize.getWidth() > 980) {
             dom.videos.intro.get(0).pause();
             dom.videos.intro.remove();
             $("#full-intro .video-wrapper").css("background-image", "url('@@assetPath@@/imgs/intro.png')");
@@ -583,7 +627,7 @@ define([
 
             _.each(dom.anchors[chapterName], function(val, key) {
                 var $el = val;
-                if($el.offset().top - 200 < scrollY) {
+                if($el.offset().top - ($window.height()*0.333) < scrollY) {
                     lastAnchors[chapterName] = $el;
                 }
             });
@@ -629,14 +673,14 @@ define([
         //     }
         // });
 
-        if(mobile || tablet) {
-            _.each(altImages, function(val, key) {
-                var key = new Image(1,1);
-                key.onload = function() {
-                }
-                key.src = val.high;
-            });
-        }
+        // if(mobile || tablet) {
+        //     _.each(altImages, function(val, key) {
+        //         var key = new Image(1,1);
+        //         key.onload = function() {
+        //         }
+        //         key.src = val.high;
+        //     });
+        // }
     }
 
     function changeImage($anchor) {
@@ -782,8 +826,9 @@ define([
             posterTag = "poster='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1'",
             autoplayTag = (autoplay) ? "autoplay" : "",
             loopTag = (loop) ? " loop " : "",
-            src = {};
+            src = {}; 
         src.mp4 = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048' type='video/mp4'>";
+        // src.ogg = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/ogg&maxbitrate=2048' type='video/ogg'>";
         src.webm = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/webm&maxbitrate=2048' type='video/webm'>";
         return "<div id='" + name +"' class='video-wrapper " + classTag + "' style='background-image: url(\"http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1\");'><video preload='metadata' " + mutedTag + posterTag + loopTag + autoplayTag + " >" + src.mp4 + src.webm + "</video></div>";
     }

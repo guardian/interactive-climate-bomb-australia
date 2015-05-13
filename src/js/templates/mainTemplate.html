@@ -56,20 +56,18 @@
 	</div>
 	<div class="int-container">
 		<div class="int-main chapter" id="intro">
-			<div class="right-container" style="background-color: #ededed; background-image: url('@@assetPath@@/imgs/test-map.jpg');">
-				
+			<div class="right-container" style="background-color: #ededed;">
+				<div id="150512Aus1_3_h264_mezzanine" class="video-wrapper top-layer" style="background-image: url('@@assetPath@@/videos/map-poster.png');"><video preload="auto" style="display: block;" id="intro-video" poster="@@assetPath@@/videos/map-poster.png"><source src="@@assetPath@@/videos/Aus-map.webmhd.webm" type="video/webm"><source src="@@assetPath@@/videos/Aus-map.mp4" type="video/mp4"></video></div>
 			</div>
 			<div class="text">
 				<h1 class="show-mobile"><%= data['intro'][0].headline %></h1>
 				<div class="text--content first" name="video" data-type="video">
-					<p class="intro-title">The Galilee Basin, Queensland  </p>
+					<p class="intro-title">Mega mines, mega emissions</p>
 					<p>Around 27bn tonnes of coal are thought to be locked under this soil.  A huge complex of coal mines is planned here, in the outback of Queensland, including the world’s largest thermal coal project.</p>
 
 					<p>So are railway lines and a massive expansion of the Abbot Point port on the Great Barrier Reef.  </p>
 
 					<p>What will this mean for the Aboriginal community, the Great Barrier Reef and the world's climate?</p>
-
-					<p>Guardian journalists investigate these dirty energy projects, and meet the people who live among them.</p> 
 				</div>
 			</div>
 		</div>
@@ -126,9 +124,10 @@
 	<% } %>
 
 	<div class="full" id="head-4">
-		<%= getVideoNew(data['outro'][0].video, "", false, true) %>
+		<%= getVideoNew(data['outro'][0].video, "", false, false) %>
 
 		<div class="int-main">
+			<div id="show-credits">View credits</div>
 			<div class="social-bar"><a class="js-mute faux-link"><i class="mute"></i></a><div class="social-icon-int facebook"><i></i></div><div class="social-icon-int twitter"><i></i></div></div>
 
 			<div class="column column-2">
