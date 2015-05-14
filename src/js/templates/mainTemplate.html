@@ -1,42 +1,16 @@
-<!-- <div class="intro" data-mobile-alt="bob">
-	<video src="@@assetPath@@/videos/test1.mp4" preload="auto" poster="@@assetPath@@/imgs/poster.png" loop autoplay webkit-playsinline>
-	</video>
-		<div class="intro-link-wrapper">
-			<a class="close faux-link" href="#">
-				Close
-			</a>
-			<a class="js-mute intro-mute faux-link">
-				<span class="js-mute-text">Mute</span>
-			</a>
 
-		</div>
-</div> -->
 <div class="audio-container">
-	<audio src="@@assetPath@@/videos/1.mp3" preload="auto" loop class="audio-player" id="audio-full-intro" autoplay></audio>
-	<audio src="@@assetPath@@/videos/2.mp3" preload="auto" loop class="audio-player" id="audio-head-1"></audio>
-	<audio src="@@assetPath@@/videos/3.mp3" preload="auto" loop class="audio-player" id="audio-head-2"></audio>
-	<audio src="@@assetPath@@/videos/4.mp3" preload="auto" loop class="audio-player" id="audio-head-3"></audio>
+	<audio src="http://visuals.guim.co.uk/2015/05/carbon-bomb/1.mp3" preload="auto" loop class="audio-player" id="audio-full-intro" autoplay></audio>
+	<audio src="http://visuals.guim.co.uk/2015/05/carbon-bomb/2.mp3" preload="none" loop class="audio-player" id="audio-head-1"></audio>
+	<audio src="http://visuals.guim.co.uk/2015/05/carbon-bomb/3.mp3" preload="none" loop class="audio-player" id="audio-head-2"></audio>
+	<audio src="http://visuals.guim.co.uk/2015/05/carbon-bomb/4.mp3" preload="none" loop class="audio-player" id="audio-head-3"></audio>
 </div>
 <div class="story-wrapper">
-	<!-- <div class="full top" id="full-series">
-		<div class="int-main">
-			<div class="title">Carbon bomb</div>
-			<div class="subheading">Turn on your sound and scroll</div>
-		</div>
-	</div>
-	<div class="int-container">
-		<div class="int-main chapter" id="chapter-series">
-			<div class="large-text">
-				<p>The fossil fuel industry is planning <span id="series-1">14 gigantic coal, oil and gas projects</span> around the world.</p>
-				<p>These so-called <span id="series-2">carbon bombs</span> – if they go ahead – would together <span id="series-3">raise global emissions by 20% by 2020</span> and would cause irreversible terrible climate change.</p>
-				<p>Guardian journalists are investigating five of these dirty energy projects, and meeting the people who live among them.</p>
-			</div>
-		</div>
-	</div>  -->
 	<div class="full top js-fixed" id="full-intro"> 
 		<%= getVideoNew(data.intro[0].video, "top-layer", true, false) %>
 		<div class="int-main">
-			<div class="social-bar"><a class="js-mute faux-link"><i class="mute"></i></a><div class="social-icon-int facebook"><i></i></div><div class="social-icon-int twitter"><i></i></div></div>
+			<img src="http://interactive.guim.co.uk/2015/03/climate-change-campaign/assets-1429182577216/imgs/logo_white.png" class="int-top-logo">
+			<div class="social-bar"><a class="js-mute faux-link"><i class="mute"></i></a><a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(data.sharing[0]['url']) + '/sfb' %>" class="social-icon-int facebook"><i></i></a><a href="https://twitter.com/intent/tweet?text=<%= encodeURIComponent(data.sharing[0]['intro']) %>&url=<%= data.sharing[0]['url'] %>/stw" class="social-icon-int twitter" target="_blank"><i></i></a></div>
 			<div class="title-box">
 				<div class="title">
 					<%= data.intro[0].headline %>
@@ -46,27 +20,17 @@
 				</div>
 			</div>
 			<div class="large-break-scroll"><i></i><div class="text-right">Scroll down to continue</div></div>
-			<!-- <div class="chapter-box">
-				<%= data.intro[0].location %>
-			</div> -->
-			<!-- <div class="scroll-box">
-				<svg width="24" height="18" viewBox="0 0 24 18"><path d="M.4 15.3l10.5-8.4L12 6l1.1.9 10.5 8.4-.5.7L12 9.7.9 16l-.5-.7z" fill="#333333"></path></svg>
-			</div> -->
+		
 		</div>
 	</div>
 	<div class="int-container">
 		<div class="int-main chapter" id="intro">
-			<div class="right-container" style="background-color: #ededed;">
-				<div id="150512Aus1_3_h264_mezzanine" class="video-wrapper top-layer" style="background-image: url('@@assetPath@@/videos/map-poster.png');"><video preload="auto" style="display: block;" id="intro-video" poster="@@assetPath@@/videos/map-poster.png"><source src="@@assetPath@@/videos/Aus-map.webmhd.webm" type="video/webm"><source src="@@assetPath@@/videos/Aus-map.mp4" type="video/mp4"></video></div>
-			</div>
-			<div class="text">
+			<div class="text--intro">
 				<h1 class="show-mobile"><%= data['intro'][0].headline %></h1>
 				<div class="text--content first" name="video" data-type="video">
 					<p class="intro-title">Mega mines, mega emissions</p>
-					<p>Around 27bn tonnes of coal are thought to be locked under this soil.  A huge complex of coal mines is planned here, in the outback of Queensland, including the world’s largest thermal coal project.</p>
-
-					<p>So are railway lines and a massive expansion of the Abbot Point port on the Great Barrier Reef.  </p>
-
+					<p>Around 27bn tonnes of coal are thought to be locked under the ground of the Galilee Basin in the outback of Queensland.  A huge proposed complex of coal mines is planned here, including the world’s largest thermal coal project. </p>
+					<p>So are railway lines and a massive expansion of the Abbot Point port on the Great Barrier Reef.</p>
 					<p>What will this mean for the Aboriginal community, the Great Barrier Reef and the world's climate?</p>
 				</div>
 			</div>
@@ -75,23 +39,20 @@
 	
 	<% for (i = 1; i < 4; i++) { %>
 		<div class="full" id="head-<%= i %>" data-mobile-alt="bob">
-			<%= getVideoNew(data['break' + i][0].video, "top-layer", false, true) %>
+			<%= getVideoNew(data['break' + i][0].video, "top-layer", false, false) %>
 			<div class="int-main">
-				<div class="social-bar"><a class="js-mute faux-link"><i class="mute"></i></a><div class="social-icon-int facebook"><i></i></div><div class="social-icon-int twitter"><i></i></div></div>
+				<div class="social-bar"><a target="_blank" class="js-mute faux-link"><i class="mute"></i></a><a href="#" class="social-icon-int facebook"><i></i></a><a target="_blank" href="https://twitter.com/intent/tweet?text=<%= encodeURIComponent(data.sharing[0]['chapter' + i]) %>&url=<%= data.sharing[0]['url'] %>/stw" class="social-icon-int twitter"><i></i></a></div>
 				<div class="large-break-container">
 					<div class="large-break-title"><%= data['break' + i][0].description %></div>
 					<div class="large-break"><%= data['break' + i][0].title %></div>
 				</div>
-				<!-- <div class="large-break-quote"><%= data['break' + i][0].quote %></div> -->
 				<div class="large-break-scroll"><i></i><div class="text-right">Scroll down to continue</div></div>
-				<!-- <div class="chapter-intro">
-					<h1><%= data['break' + i][0].title %></h1>
-				</div> -->
+				
 			</div>
 		</div>
 		<div class="int-container">
 			<div class="int-main chapter chapter-real" id="chapter-<%= i %>">
-				<div class="social-bar"><a class="js-mute faux-link"><i class="mute"></i></a><div class="social-icon-int facebook"><i></i></div><div class="social-icon-int twitter"><i></i></div></div>
+				<div class="social-bar"><a target="_blank" class="js-mute faux-link"><i class="mute"></i></a><a href="https://www.facebook.com/sharer/sharer.php?u=<%= data.sharing[0]['url'] + '/sfb' %>" class="social-icon-int facebook"><i></i></a><a target="_blank" href="https://twitter.com/intent/tweet?text=<%= encodeURIComponent(data.sharing[0]['chapter' + i]) %>&url=<%= data.sharing[0]['url'] %>/stw" class="social-icon-int twitter"><i></i></a></div>
 				<div class="right-container">
 					<%= getVideoNew(data['chapter' + i][0].anchor, "top-layer", false, true) %>
 				</div>
@@ -110,11 +71,15 @@
 								<p class="pullquote">
 									<%= row.content %> 
 								</p>
-								<% if(row.meta !== "") { %><p class="pullquote-credit">― <%= row.meta %></p><% } %>
+								<% if(row.meta !== "" && width < 940) { console.log(width); %><p class="pullquote-credit">― <%= row.meta %></p><% } %> 
 							<% } %>
 
 							<% if(row.type === "image") { %>
 								<img src="<%= row.content %>" class="<%= row.meta %>">
+							<% } %>
+
+							<% if(row.altimage !== "" && width < 940) { %>
+								<img src="<%= row.altimage %>">
 							<% } %>
 						<% }); %>
 					</div>
@@ -127,23 +92,23 @@
 		<%= getVideoNew(data['outro'][0].video, "", false, false) %>
 
 		<div class="int-main">
+			<img src="@@assetPath@@/imgs/bottomlogo.png" class="int-bottom-logo">
 			<div id="show-credits">View credits</div>
-			<div class="social-bar"><a class="js-mute faux-link"><i class="mute"></i></a><div class="social-icon-int facebook"><i></i></div><div class="social-icon-int twitter"><i></i></div></div>
+			<div class="social-bar"><a target="_blank" class="js-mute faux-link"><i class="mute"></i></a><a href="https://www.facebook.com/sharer/sharer.php?u=<%= data.sharing[0]['url'] + '/sfb' %>" class="social-icon-int facebook"><i></i></a><a target="_blank" href="https://twitter.com/intent/tweet?text=<%= encodeURIComponent(data.sharing[0]['outro']) %>&url=<%= data.sharing[0]['url'] %>/stw" class="social-icon-int twitter"><i></i></a></div>
 
 			<div class="column column-2">
 				<p><span class="list-title">Produced and directed by</span><span class="list-name">Lindsay Poulton</span></p>
 				<p><span class="list-title">Written by</span><span class="list-name">Oliver Milman</span></p>
 				<p><span class="list-title">Cinematography</span><span class="list-name">David Maurice Smith</span></p>
-				<p><span class="list-title">Commissioning editor</span><span class="list-name">John Mullin</span></p>
+				<p><span class="list-title">Commissioning editors</span><span class="list-name">John Mullin & James Randerson</span></p>
 				<p><span class="list-title">Music composed by</span><span class="list-name">Graham Hadfield</span>
-				<p><span class="list-title">Executive Producers</span><span class="list-name">Xaquin Gonzalez & Aron Pilhofer</span>
+				<p><span class="list-title">Producer</span><span class="list-name">Ekaterina Ochagavia</span></p>
 			</div>
 			<div class="column column-3">
 				<p><span class="list-title">Interactive development</span><span class="list-name">Josh Holder</span></p>
 				<p><span class="list-title">Interactive design</span><span class="list-name">Monica Ulmanu</span></p>
-				<p><span class="list-title">Interactive producer</span><span class="list-name">Ekaterina Ochagavia</span></p>
-				<p><span class="list-title">With special thanks to</span><span class="list-name" style="line-height: 20px; max-width: 356px;">Francesca Panetta, Alex Purcell, James Randerson, Bill Code, Colinda Langburne</span></p>
-				<div id="keepit"><img class="bottom-logo" src="http://interactive.guim.co.uk/2015/03/climate-change-campaign/assets-1429182577216/imgs/logo_white.png">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ac rhoncus lectus, sit amet mattis erat. Fusce molestie nibh et efficitur ornare.</div>
+				<p><span class="list-title">With special thanks to</span><span class="list-name" style="line-height: 20px; max-width: 356px;">Francesca Panetta, Alex Purcell, Bill Code, Colinda Langburne</span></p>
+				<div id="keepit"><img class="bottom-logo" src="http://interactive.guim.co.uk/2015/03/climate-change-campaign/assets-1429182577216/imgs/logo_white.png">Climate change poses a threat to all of us. Join the Guardian's campaign and help urge the world's two biggest charitable funds to move their money out of fossil fuels</div>
 			</div>
 			<div class="column column-1"><span>Carbon bomb: Australia</span><%= data.intro[0].headline %></div>
 		</div>
