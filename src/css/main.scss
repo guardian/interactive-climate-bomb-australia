@@ -235,7 +235,9 @@ body {
 
 #full-intro {
 	.is-immersive & {
-		height: calc(100% - 48px);
+		@include mq(desktop) {
+			height: calc(100% - 48px);
+		}
 	}
 
 	.social-bar {
