@@ -82,13 +82,14 @@ define([
             data = typeof data === 'string' ? JSON.parse(data) : data;
             whatBrowser();
             app(data);
+            console.log(data);
         });
     }
 
     function app(data) {
         sheets = data.sheets;
         var mainTemplate = _.template(mainTmpl),
-            mainHTML = mainTemplate({data: data.sheets, getVideo: getVideo, videos: videos, getVideoNew: getVideoNew}),
+            mainHTML = mainTemplate({data: data.sheets, getVideo: getVideo, videos: videos, getVideoNew: getVideoNew, width: viewportSize.getWidth()}),
             navTemplate = _.template(navTmpl),
             navHTML = navTemplate({});
 
@@ -176,6 +177,8 @@ define([
         dom.intro = {}
         dom.intro['right'] = $("#intro .right-container");
         dom.intro['div'] = $("#intro");
+
+        // console.log(dom);
     }
 
     function whatBrowser() {
@@ -197,7 +200,7 @@ define([
 
             $(window).scroll(_.throttle(function() {
                 stickDivs(window.scrollY);
-            }, 30));
+            }, 50));
 
             $(window).resize(_.throttle(function() {
                 resizeVideos();
@@ -215,7 +218,10 @@ define([
                     $(".title-box").addClass("visible");
 
                     setTimeout(function() {
-                        $("#full-intro .large-break-scroll").addClass("scroll-visible");
+                        $(".int-top-logo").addClass("visible");
+                        setTimeout(function() {
+                            $("#full-intro .large-break-scroll").addClass("scroll-visible");
+                        }, 1000);
                     }, 1000);
                 }, 22000);
 
@@ -227,11 +233,27 @@ define([
             }
         }
 
+        var chp2Width = $("#chapter-2").width(),
+            chp2RCWidth = $("#chapter-2 .right-container").width(),
+            chp2TWidth = $("#chapter-2 .text").width();
+
+        if(chp2Width - (chp2RCWidth + chp2TWidth) > 40) {
+            $("head").append("<style>.text { width: " + (chp2Width - chp2RCWidth - 60) + "px; }</style>");
+        }
+
         $window.resize(_.debounce(function(){
-            if((viewportSize.getWidth() > 980 && viewportSize.getWidth() < 980) || (viewportSize.getWidth() < 980 && windowWidth > 980) ) {
+            chp2Width = $("#chapter-2").width();
+            chp2RCWidth = $("#chapter-2 .right-container").width();
+            chp2TWidth = $("#chapter-2 .text").width();
+            // console.log(viewportSize.getWidth(), windowWidth);
+            if((viewportSize.getWidth() > 980 && windowWidth < 980) || (viewportSize.getWidth() < 980 && windowWidth > 980) ) {
                 location.reload();
             }
             windowWidth = viewportSize.getWidth();
+            console.log(chp2Width - (chp2RCWidth + chp2TWidth), chp2Width - (chp2RCWidth + chp2TWidth));
+            if(viewportSize.getWidth() > 980 && (chp2Width - (chp2RCWidth + chp2TWidth) > 40 || chp2Width - (chp2RCWidth + chp2TWidth) < 20)) {
+                $("head").append("<style>.text { width: " + (chp2Width - chp2RCWidth - 60) + "px; }</style>");
+            }
         }, 500));
 
         $window.on("orientationchange", _.debounce(function(){
@@ -240,11 +262,6 @@ define([
         }, 500));
 
         setAudioLevels();
-
-        // $(window).scroll(_.debounce(function() {
-        //     var currentScrollY = latestKnownScrollY;
-        //     anchorsAction(currentScrollY);
-        // }, 100));
 
         if((mobile || tablet) || viewportSize.getWidth() < 980) {
             anchorReplace();
@@ -269,6 +286,7 @@ define([
 
         $("#show-credits").click(function() {
             $(".column").addClass("credits-visible");
+            $(".int-bottom-logo").css("opacity", "0");
             $("#show-credits").css("opacity", "0");
         });
 
@@ -366,7 +384,12 @@ define([
             var $full = $el.closest(".full");
             if($full.offset().top <= $window.scrollTop() && key !== "head-4") {
                 $el.parent(".video-wrapper").css("position", "fixed");
-                $full.addClass("js-fixed");
+
+                if($full.offset().top + $full.height() >= $window.scrollTop()) {
+                    $full.addClass("js-fixed");
+                } else {
+                    $full.removeClass("js-fixed");
+                }
 
                 if(fixed[key] !== true) {
                     fixed[key] = true;
@@ -382,7 +405,8 @@ define([
                     setTimeout(function() {
                         $full.find(".large-break-scroll").addClass("scroll-visible");
                         $.scrollLock(false);
-                    }, 1500)
+
+                    }, 1500);
 
                     $full[0].scrollIntoView();
                     $.scrollLock(true);
@@ -393,15 +417,15 @@ define([
             }
         });
 
-        if(!pastIntro && window.scrollY > $("#intro").offset().top + 20) {
-            window.scrollTo(0, $("#intro").offset().top + 20);
-            $.scrollLock(true);
-            pastIntro = true;
+        // if(!pastIntro && window.scrollY > $("#intro").offset().top + 20) {
+        //     window.scrollTo(0, $("#intro").offset().top + 20);
+        //     $.scrollLock(true);
+        //     pastIntro = true;
 
-            setTimeout(function() {
-                $.scrollLock(false);
-            }, 1000);
-        }
+        //     setTimeout(function() {
+        //         $.scrollLock(false);
+        //     }, 1000);
+        // }
 
         if(window.scrollY > dom.intro['div'].offset().top) {
             dom.intro['right'].addClass("right-container--sticky");
@@ -422,7 +446,7 @@ define([
             var $el = val,
                 $elParent = $el.closest(".full");
 
-            if($elParent.offset().top - $window.height() + 250 <= scrollY && $window.scrollTop() + 250 < $elParent.offset().top + $elParent.height()) {
+            if(($elParent.offset().top - $window.height() + 500 <= scrollY && $window.scrollTop() + 500 < $elParent.offset().top + $elParent.height())) {
                 // $el.parent().css("opacity", "1");
                 // $el.get(0).volume = 1;
                 if($el.get(0).paused) {
@@ -823,14 +847,14 @@ define([
     function getVideoNew(name, className, autoplay, loop) {
         var mutedTag = (mute) ? " muted " : "",
             classTag =  (className) ? className : "",
-            posterTag = "poster='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1'",
+            posterTag = "poster='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=1024&poster=1'",
             autoplayTag = (autoplay) ? "autoplay" : "",
             loopTag = (loop) ? " loop " : "",
             src = {}; 
         src.mp4 = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048' type='video/mp4'>";
         // src.ogg = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/ogg&maxbitrate=2048' type='video/ogg'>";
         src.webm = "<source src='http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/webm&maxbitrate=2048' type='video/webm'>";
-        return "<div id='" + name +"' class='video-wrapper " + classTag + "' style='background-image: url(\"http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=2048&poster=1\");'><video preload='metadata' " + mutedTag + posterTag + loopTag + autoplayTag + " >" + src.mp4 + src.webm + "</video></div>";
+        return "<div id='" + name +"' class='video-wrapper " + classTag + "' style='background-image: url(\"http://multimedia.guardianapis.com/interactivevideos/video.php?file=" + name + "&format=video/mp4&maxbitrate=1024&poster=1\");'><video preload='metadata' " + mutedTag + posterTag + loopTag + autoplayTag + " >" + src.mp4 + src.webm + "</video></div>";
     }
 
     $.scrollLock = ( function scrollLockClosure() {
